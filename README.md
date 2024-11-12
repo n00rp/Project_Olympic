@@ -1,9 +1,4 @@
 # Project_Olympic
 Grupparbete i form av Projekt i kursen Databehandling 
 
-Björn testar att pusha
-
-Jenny testar att pusha igen
-
-
-Martin testar också!! 
+Efter att ha testat lite, så kommer det bli annorlunda med Commit. Det kommer uppstå konflikter som vi kommer att behöva hantera. Vi får försöka lära oss allt eftersom här.. 
