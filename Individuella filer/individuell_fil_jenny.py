@@ -1,4 +1,5 @@
 # En fil för att testa kod i innan det överförs till main filen för grupparbetet.
+# Uppgift 1)
 
 import pandas as pd
 import hashlib as hl
@@ -31,3 +32,5 @@ plt.title("Tysklands ålder i OS")
 plt.xlabel("Ålder")
 plt.ylabel("Antal")
 plt.show()
+
+# Uppgift 2)
