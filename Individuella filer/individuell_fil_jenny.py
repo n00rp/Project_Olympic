@@ -42,10 +42,10 @@ df_sporter = df_anonym[df_anonym["Sport"].isin(["Ice Hockey", "Football", "Saili
 df_sporter_de_se = df_sporter[df_sporter["NOC"].isin(["GER", "SWE", "NOR", "DEN"])]
 
 # Plottar resultat för att visualisera medaljfördelningen mellan länder i dessa sporter:
-# sns.set_theme(style="darkgrid")
-# sns.lineplot(x="Sport", y="Medalj", hue="NOC", data=df_sporter_de_se, palette="pastel")
+sns.set_theme(style="darkgrid")
+sns.lineplot(x="Sport", y="Medal", hue="NOC", data=df_sporter_de_se, palette="pastel")
 
-# plt.show()
+plt.show()
 
 df_tyskland_förenade_lag = df_anonym[(df_anonym["NOC"] == "GER") & (df["Year"] >= 1956) & (df["Year"] <= 1964)]
 
@@ -59,7 +59,7 @@ sns.barplot(x="Year", y="Medal", data=df_tyskland_grouped, palette="pastel")
 plt.title("Antal medaljer för Tysklands förenade lag i OS")
 plt.xlabel("År")
 plt.ylabel("Antal medaljer")
-plt.legend(title="Kön")
+
 plt.show()
 
 #  åldersfördelning i sporterna
