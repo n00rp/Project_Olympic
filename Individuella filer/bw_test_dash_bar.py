@@ -60,13 +60,12 @@ def update_graph(x_axis, y_axis):
 
     dff = df
    
-    barchart=px.bar(
+    barchart=px.histogram(
             data_frame=dff,
             x=x_axis,
             y=y_axis,
-            title="Medaljörer",
-            color='Medal',
-            barmode='group',
+            histfunc="avg",
+            color="Medal"
             )
 
     barchart.update_layout(xaxis={'categoryorder':'total ascending'},
