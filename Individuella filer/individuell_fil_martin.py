@@ -71,5 +71,28 @@ plt.title("Medaljer i utvalda sporter")
 plt.legend()
 plt.show()
 
+#Tittar på åldersfördelningen av deltagarna efter sport
+
+# Välj ut 2-4 sporter
+sporter = ["Athletics", "Cycling", "Tennis", "Shooting"]
+
+# Filtrera data för Tyskland och Spanien
+tyskland_data = df_anonym[df_anonym["NOC"] == "GER"]
+spanien_data = df_anonym[df_anonym["NOC"] == "ESP"]
+
+# Räkna antal deltagare per ålder och sport
+tyskland_deltagare_per_ålder = tyskland_data[tyskland_data["Sport"].isin(sporter)].groupby(["Sport", "Age"])["ID"].count()
+spanien_deltagare_per_ålder = spanien_data[spanien_data["Sport"].isin(sporter)].groupby(["Sport", "Age"])["ID"].count()
+
+# Plotta ålder för Tyskland och Spanien
+sns.set()
+plt.figure(figsize=(10,6))
+sns.lineplot(x="Age", y="Deltagare", hue="NOC", data=pd.DataFrame({"Age": tyskland_deltagare_per_ålder.index.get_level_values("Age").tolist() + spanien_deltagare_per_ålder.index.get_level_values("Age").tolist(), "Deltagare": tyskland_deltagare_per_ålder.values.tolist() + spanien_deltagare_per_ålder.values.tolist(), "NOC": ["Tyskland"] * len(tyskland_deltagare_per_ålder) + ["Spanien"] * len(spanien_deltagare_per_ålder)}))
+plt.xlabel("Ålder")
+plt.ylabel("Antal deltagare")
+plt.title("Ålder för Tyskland och Spanien i valda sporter")
+plt.legend()
+plt.show()
+
 
 
