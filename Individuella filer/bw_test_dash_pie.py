@@ -25,18 +25,12 @@ app.layout = html.Div([
             multi=False,                                                           
             placeholder='Välj...',     
             clearable=True,                     
-            style={'width':"40%"},             
-            ),  
+            style={'width':"40%"},),  
         html.Div(id='output_data'),
 
-        html.Div([
-        dcc.Graph(id='olympic')
-    ],className=""),
-
-                                                             
+        html.Div([dcc.Graph(id='olympic')],className=""),                                                    
                                                 
     ],className=""),
-
 ])
 
 
@@ -48,11 +42,10 @@ app.layout = html.Div([
 def build_graph(column_chosen):
     dff=df
     fig = px.pie(dff, names=column_chosen)
-    fig.update_traces(textinfo='percent+label')
+    fig.update_traces(textinfo="percent+label")
     fig.update_layout(title={'text':'Olympiska spel',
                       'font':{'size':28},'x':0.5,'xanchor':'center'})
     return fig
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)
