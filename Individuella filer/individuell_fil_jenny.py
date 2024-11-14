@@ -38,7 +38,7 @@ plt.show()
 
 df_sporter = df_anonym[df_anonym["Sport"].isin(["Ice Hockey", "Football", "Sailing", "Handball"])]
 
-# Filtrera data för att endast inkludera Tyskland och Sverige
+# Filtrera data för att endast inkludera Tyskland, Sverige, Norge och Danmark.
 df_sporter_de_se = df_sporter[df_sporter["NOC"].isin(["GER", "SWE", "NOR", "DEN"])]
 
 # Plottar resultat för att visualisera medaljfördelningen mellan länder i dessa sporter:
@@ -63,5 +63,12 @@ plt.ylabel("Antal medaljer")
 plt.show()
 
 #  åldersfördelning i sporterna
+df_sporter = df_anonym[df_anonym["Sport"].isin(["Ice Hockey", "Football", "Sailing", "Handball"])]
+sns.set_theme(style="darkgrid")
+sns.histplot(x="Age", hue="Sport", data=df_sporter, bins=20, kde=True)
 
+plt.title("Åldersfördelning i sporterna")
+plt.xlabel("Ålder")
+plt.ylabel("Antal deltagare")
+plt.show()
 
