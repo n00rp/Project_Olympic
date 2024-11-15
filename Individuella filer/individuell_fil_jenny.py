@@ -12,7 +12,7 @@ df = pd.read_csv("Project_Olympic/athlete_events.csv")
 df_anonym = df.copy()
 df_anonym["Name"] = df_anonym["Name"].apply(lambda x: hl.sha256(x.encode()).hexdigest())
 
-# print(f" Kolumner som anonymiseras: {df_anonym.columns}")
+print(f" Kolumner som anonymiseras: {df_anonym.columns}")
 
 # sporter tyskland tagit flest medaljer i
 tyskland_medaljer = df_anonym[(df_anonym["NOC"] == "GER") & (df["Medal"] != "NA")]
@@ -102,5 +102,3 @@ plt.show()
 
 print(f"Sommar OS: {sommar_os}")
 print(f"Vinter OS: {vinter_os}")
-
-
