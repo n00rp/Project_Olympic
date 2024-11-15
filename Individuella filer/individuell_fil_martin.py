@@ -43,7 +43,7 @@ print(tyskland_medaljer_per_lag)
 
 #Filtering av medaljer för lagsporter
 tyskland_medaljer_per_lag_fotboll = tyskland_medaljer[tyskland_medaljer["Sport"] == "Hockey"].groupby(["Event", "Games"])["Medal"].nunique()
-print(tyskland_medaljer_per_lag_fotboll)
+print(f"Tyskland har tagit {tyskland_medaljer_per_lag_fotboll} medaljer under olika OS i Hockey")
 
 
 # Välj ut 2-4 sporter
