@@ -70,7 +70,7 @@ df_sporter = df_anonym[df_anonym["Sport"].isin(["Ice Hockey", "Football", "Saili
 sns.set_theme(style="darkgrid")
 sns.histplot(x="Age", hue="Sport", data=df_sporter, bins=20, kde=True)
 
-plt.title("Åldersfördelning i sporterna")
+plt.title("Åldersfördelning i sporterna i OS")
 plt.xlabel("Ålder")
 plt.ylabel("Antal deltagare")
 plt.show()
