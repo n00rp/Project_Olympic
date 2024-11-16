@@ -20,7 +20,7 @@ app.layout = [
 )
 def update_graph(sport):
     dff=df[df["Sport"]==sport]
-    fig = px.histogram(dff, x="Age", nbins=45, color="Sport")
+    fig = px.histogram(dff, x="Age", nbins=45, color="Sport", width=600)
     plt.show()
     return fig
 

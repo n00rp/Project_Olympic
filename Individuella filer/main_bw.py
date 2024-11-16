@@ -40,11 +40,8 @@ def länder_prestation_över_tid_graph():
     return fig
 
 def ålders_fördelning_func():
-    df_sporter = df[df["Sport"].isin(["Curling", "Football", "Sailing", "Handball"])]
-    sns.set_theme(style="darkgrid")
-    fig, ax = plt.subplots()
-    plt.figure(figsize=(4,4))
-    sns.histplot(x="Age", hue="Sport", data=df_sporter, bins=20, kde=True, ax=ax)
+    df_sporter = df[df["Sport"].isin(["Cross Country Skiing", "Football", "Sailing", "Handball"])]
+    fig = px.histogram(df_sporter, x="Age", color="Sport", nbins=40)
     return fig
 
 
@@ -63,6 +60,8 @@ app.layout = html.Div([
             html.Button('Visa åldersfördelning', id='ålders-fördelning-button', n_clicks=0),
             dcc.Graph(id='ålders-fördelning'),],style={"padding": 10, "flex":1, })
     ], style={"display": "flex", "flexDirection":"row"})
+       
+
 
 
 # Definiera callback-funktion för att uppdatera grafen
