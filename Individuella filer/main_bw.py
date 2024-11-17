@@ -44,12 +44,18 @@ def ålders_fördelning_func():
     fig = px.histogram(df_sporter, x="Age", color="Sport", nbins=40)
     return fig
 
+def langd_och_vikt_func():
+    df_vikt=df[df["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
+    fig = px.scatter(df_vikt, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], animation_frame="Sex", color="Sport", opacity=.2)
+    return fig
+
 
 # Skapa Dash-app
 app = dash.Dash()
 
 # Definiera app-layout
 app.layout = html.Div([
+    html.Div([
         html.Div([
             dcc.RadioItems(options=["Deltagarländer", "Medaljländer"], value="Deltagarländer", id='controls-and-radio-item'),
             dcc.Graph(figure={}, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
@@ -58,10 +64,14 @@ app.layout = html.Div([
             dcc.Graph(id='lander-prestation-graph'),],style={"padding": 10, "flex":1, }),
         html.Div([
             html.Button('Visa åldersfördelning', id='ålders-fördelning-button', n_clicks=0),
-            dcc.Graph(id='ålders-fördelning'),],style={"padding": 10, "flex":1, })
-    ], style={"display": "flex", "flexDirection":"row"})
-       
+            dcc.Graph(id='ålders-fördelning'),],style={"padding": 10, "flex":1, }),
+        html.Div([
+            html.Button('Visa längd och vikt', id='langd-vikt-button', n_clicks=0),
+            dcc.Graph(id='langd-vikt-graph'),],style={"padding": 10, "flex":1, }
+    )], style={"display": "flex", "flexDirection":"row"}),
+    
 
+])
 
 
 # Definiera callback-funktion för att uppdatera grafen
@@ -73,11 +83,23 @@ def update_graph(col_chosen):
     fig = px.line(df_cc_delt, x="Games", y=col_chosen, width=400)
     return fig
 
-# Definiera callback-funktion för att visa länders prestation över tid
+
+@app.callback(
+    Output('langd-vikt-graph', 'figure'),
+    [Input('langd-vikt-button', 'n_clicks')]
+)
+
+def langd_och_vikt(n_clicks):
+    if n_clicks > 0:
+        return langd_och_vikt_func()
+    else:
+        return {}
+
 @app.callback(
     Output('lander-prestation-graph', 'figure'),
     [Input('lander-prestation-button', 'n_clicks')]
 )
+
 def update_lander_prestation_graph(n_clicks):
     if n_clicks > 0:
         return länder_prestation_över_tid_graph()
