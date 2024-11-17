@@ -61,17 +61,20 @@ app.layout = html.Div([
             dcc.Graph(figure={}, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
         html.Div([
             html.Button('Visa länders prestation över tid', id='lander-prestation-button', n_clicks=0),
-            dcc.Graph(id='lander-prestation-graph'),],style={"padding": 10, "flex":1, }),
+            dcc.Graph(id='lander-prestation-graph'),],style={"padding": 10, "flex":1, })
+            ], style={"display": "flex", "flexDirection":"row"}),
+        
+    html.Div([    
         html.Div([
             html.Button('Visa åldersfördelning', id='ålders-fördelning-button', n_clicks=0),
             dcc.Graph(id='ålders-fördelning'),],style={"padding": 10, "flex":1, }),
         html.Div([
             html.Button('Visa längd och vikt', id='langd-vikt-button', n_clicks=0),
-            dcc.Graph(id='langd-vikt-graph'),],style={"padding": 10, "flex":1, }
-    )], style={"display": "flex", "flexDirection":"row"}),
+            dcc.Graph(id='langd-vikt-graph'),],style={"padding": 10, "flex":1, })
+            ], style={"display": "flex", "flexDirection":"row"}),
     
+    ])
 
-])
 
 
 # Definiera callback-funktion för att uppdatera grafen
