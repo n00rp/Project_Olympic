@@ -9,10 +9,10 @@ df = pd.read_csv("../athlete_events.csv")
 
 app = Dash()
 
-app.layout = [
+app.layout = html.Div([
     dcc.Dropdown(options=["Sailing", "Football", "Cross Country Skiing", "Handball"], value="Football", id='dropdown-item'),
     dcc.Graph(figure={}, id='controls-and-graph')
-]
+], style={"width": 500})
 
 @app.callback(
     Output(component_id='controls-and-graph', component_property='figure'),
