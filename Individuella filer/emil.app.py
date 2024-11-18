@@ -30,8 +30,8 @@ ger_df = df[df["NOC"] == "GER"]
 medal = ger_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 medals = ger_df[medal]
 color1 = ["silver", "orange", "gold"]
-fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=500, height=500)
-fig.update_layout(title="Tyska Induviduella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
+fig1 = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=500, height=500)
+fig1.update_layout(title="Tyska Induviduella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
 
 
 """ Tabell på medaljer som nation i Tyskland """
@@ -44,26 +44,21 @@ fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis
 
 app = Dash()
 
-app.layout = html.Div(children=[
-    html.Div(children=[
-        html.Div(children=[
-            html.H3(children="Tyska Nationella Medaljer"),
-            html.Img(src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Germany.svg/1200px-Flag_of_Germany.svg.png"),
-            dcc.Graph(
-                id="ger-team-medals",
-                figure=fig
-            )], style={"padding": 10, "flex":1, }),
-        html.Div(children=[
-            html.H3(children="Tyska Induviduella Medaljer"),
-            html.Img(src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/Flag_of_Germany.svg/1200px-Flag_of_Germany.svg.png"),
-            dcc.Graph(
-                id="ger-indv-medals",
-                figure=fig
-            )], style={"padding": 10, "flex":1, })
+app.layout = [
+    html.H1(children="Olympiska Spelen", style={'textAlign':'center'}),
+    html.H2(children="Tyskland", style={'textAlign':'center'}),
+
+
+    html.Div([
+        html.Div([
+            dcc.Graph(figure=fig, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
+        html.Div([
+            dcc.Graph(figure= fig1, id='lander-prestation-graph'),],style={"padding": 10, "flex":1, })
             ], style={"display": "flex", "flexDirection":"row"}),
-   
-    ])
-    
+    ]
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
