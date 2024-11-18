@@ -111,7 +111,7 @@ def update_graph(col_chosen):
     [Input('pie-radio', 'value')]
 )
 def update_graph(val):
-    fig = px.pie(ger_delt_och_med, values=val)
+    fig = px.pie(ger_delt_och_med, values=val, names=ger_delt_och_med.index, title="Tysklands 10 största sporter")
     return fig
 
 
