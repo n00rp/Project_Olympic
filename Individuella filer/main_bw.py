@@ -35,7 +35,7 @@ top10_deltag=df_ger["Sport"].value_counts().head(10)
 top10_medalj=df_ger_medals["Sport"].value_counts().head(10)
 ger_deltagare=top10_deltag.to_frame(name="Deltagare")
 ger_medaljer=top10_medalj.to_frame(name="Medaljer")
-ger_delt_och_med=pd.concat([ger_deltagare, ger_medaljer])
+ger_delt_och_med=pd.concat([ger_deltagare, ger_medaljer], axis=1)
 
 # Definiera funktion för att generera graf för länders prestation över tid
 def länder_prestation_över_tid_graph():
