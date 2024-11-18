@@ -26,8 +26,16 @@ for j in wo:
     medal_land=(len(df_year_skidor_medals["NOC"].unique()))
     delt_land=(len(df_year_skidor["NOC"].unique()))
     cc_delt.append([j, delt_land, medal_land])
-
 df_cc_delt=pd.DataFrame(cc_delt, columns=["Games",  "Deltagarländer", "Medaljländer"])
+
+# Skapa df med Tysklands 10-i-topp-sporter sett till deltagare respektive medaljer
+df_ger=df[df["NOC"]=="GER"]
+df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]
+top10_deltag=df_ger["Sport"].value_counts().head(10)
+top10_medalj=df_ger_medals["Sport"].value_counts().head(10)
+ger_deltagare=top10_deltag.to_frame(name="Deltagare")
+ger_medaljer=top10_medalj.to_frame(name="Medaljer")
+ger_delt_och_med=pd.concat([ger_deltagare, ger_medaljer])
 
 # Definiera funktion för att generera graf för länders prestation över tid
 def länder_prestation_över_tid_graph():
@@ -49,6 +57,7 @@ def langd_och_vikt_func():
     df_vikt=df_ger[df_ger["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
     fig = px.scatter(df_vikt, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], animation_frame="Sex", color="Sport", opacity=.4)
     return fig
+
 
 
 # Skapa Dash-app
@@ -73,6 +82,15 @@ app.layout = html.Div([
             html.Button('Visa längd och vikt', id='langd-vikt-button', n_clicks=0),
             dcc.Graph(id='langd-vikt-graph'),],style={"padding": 10, "flex":1, })
             ], style={"display": "flex", "flexDirection":"row"}),
+
+    html.Div([    
+        # html.Div([
+        #     html.Button('Visa åldersfördelning', id='ålders-fördelning-button', n_clicks=0),
+        #     dcc.Graph(id='ålders-fördelning'),],style={"padding": 10, "flex":1, }),
+        html.Div([
+            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio'),
+            dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),
+            ], style={"display": "flex", "flexDirection":"row"}),
     
     ])
 
@@ -85,6 +103,15 @@ app.layout = html.Div([
 )
 def update_graph(col_chosen):
     fig = px.line(df_cc_delt, x="Games", y=col_chosen, width=400)
+    return fig
+
+# Pie chart med top 10-sporter
+@app.callback(
+    Output('pie-graph', 'figure'),
+    [Input('pie-radio', 'value')]
+)
+def update_graph(val):
+    fig = px.pie(ger_delt_och_med, values=val)
     return fig
 
 
