@@ -47,9 +47,9 @@ ger_percent=pd.concat([ger_deltagare, ger_medaljer], axis=1)
 ger_percent["Procent"]=100*ger_percent["Medaljer"]/ger_percent["Deltagare"]
 ger_percent=ger_percent.sort_values("Procent", ascending=False)
 
-ger_percent=ger_percent[ger_percent["Deltagare"]>=20]
-ger_percent1=ger_percent.head(22).rename(columns={"Procent": "Best"})
-ger_percent2=ger_percent.tail(22).rename(columns={"Procent": "Worst"})
+ger_percent=ger_percent[(ger_percent["Deltagare"]>=20) & (ger_percent["Medaljer"]>=1)]
+ger_percent1=ger_percent.head(19).rename(columns={"Procent": "Best"})
+ger_percent2=ger_percent.tail(19).rename(columns={"Procent": "Worst"})
 
 bestworst=pd.concat([ger_percent1, ger_percent2])
 colors=["#cc3333"]
@@ -101,13 +101,13 @@ app.layout = html.Div([
             dcc.Graph(id='langd-vikt-graph'),],style={"padding": 10, "flex":1, })
             ], style={"display": "flex", "flexDirection":"row"}),
 
-    html.Div([  
-        html.Div([
-            dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio'),
-            dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),  
+    html.Div([ 
         html.Div([
             dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio'),
-            dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),         
+            dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),  
+        html.Div([
+            dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio'),
+            dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),                 
             ], style={"display": "flex", "flexDirection":"row"}),
     
     ])
@@ -120,7 +120,7 @@ app.layout = html.Div([
     [Input('controls-and-radio-item', 'value')]
 )
 def update_graph(col_chosen):
-    fig = px.line(df_cc_delt, x="Games", y=col_chosen, width=400)
+    fig = px.line(df_cc_delt, x="Games", y=col_chosen)
     return fig
 
 # Pie chart med top 10-sporter
@@ -138,7 +138,8 @@ def update_graph(val):
     [Input('bar-radio', 'value')]
 )
 def update_graph(barval):
-    fig=px.histogram(bestworst, x=bestworst.index, y=barval, color_discrete_sequence=colors)
+    fig=px.histogram(bestworst, x=bestworst.index, y=barval, color_discrete_sequence=colors, title="Tysklands procentuellt bästa och sämsta grenar")
+    fig.update_layout(yaxis_title="Procent")
     return fig
 
 
