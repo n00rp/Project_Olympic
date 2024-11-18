@@ -47,7 +47,7 @@ def ålders_fördelning_func():
 def langd_och_vikt_func():
     df_ger=df[df["NOC"]=="GER"]
     df_vikt=df_ger[df_ger["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
-    fig = px.scatter(df_vikt, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], animation_frame="Sex", color="Sport", opacity=.2)
+    fig = px.scatter(df_vikt, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], animation_frame="Sex", color="Sport", opacity=.4)
     return fig
 
 
