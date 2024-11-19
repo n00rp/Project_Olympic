@@ -11,7 +11,8 @@ import seaborn as sns
 df = pd.read_csv("../athlete_events.csv")
 
 # Definiera lista med vinter-OS
-wo=["1948 Winter", "1952 Winter", "1956 Winter", "1960 Winter",
+wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
+    "1948 Winter", "1952 Winter", "1956 Winter", "1960 Winter",
     "1964 Winter", "1968 Winter", "1972 Winter", "1976 Winter",
     "1980 Winter", "1984 Winter", "1988 Winter", "1992 Winter",
     "1994 Winter", "1998 Winter", "2002 Winter", "2006 Winter",
@@ -67,7 +68,7 @@ def länder_prestation_över_tid_graph():
 
 def ålders_fördelning_func():
     df_sporter = df[df["Sport"].isin(["Cross Country Skiing", "Football", "Sailing", "Handball"])]
-    fig = px.histogram(df_sporter, x="Age", color="Sport", nbins=40)
+    fig = px.histogram(df_sporter, x="Age", color="Sport", nbins=40, opacity=.4)
     return fig
 
 def langd_och_vikt_func():
@@ -89,7 +90,7 @@ app.layout = html.Div([
             dcc.Graph(figure={}, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
         html.Div([
             html.Button('Visa länders prestation över tid', id='lander-prestation-button', n_clicks=0),
-            dcc.Graph(id='lander-prestation-graph'),],style={"padding": 10, "flex":1, })
+            dcc.Graph(id='lander-prestation-graph'),],style={"padding": 10, "flex":1, }),
             ], style={"display": "flex", "flexDirection":"row"}),
         
     html.Div([    
