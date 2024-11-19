@@ -26,8 +26,34 @@ for j in wo:
     medal_land=(len(df_year_skidor_medals["NOC"].unique()))
     delt_land=(len(df_year_skidor["NOC"].unique()))
     cc_delt.append([j, delt_land, medal_land])
-
 df_cc_delt=pd.DataFrame(cc_delt, columns=["Games",  "Deltagarländer", "Medaljländer"])
+
+# Skapa df med Tysklands 10-i-topp-sporter sett till deltagare respektive medaljer
+df_ger=df[df["NOC"]=="GER"]
+df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]
+top10_deltag=df_ger["Sport"].value_counts().head(10)
+top10_medalj=df_ger_medals["Sport"].value_counts().head(10)
+ger_deltagare=top10_deltag.to_frame(name="Deltagare")
+ger_medaljer=top10_medalj.to_frame(name="Medaljer")
+ger_delt_och_med=pd.concat([ger_deltagare, ger_medaljer], axis=1)
+
+# skapa df med tysklands procentuellt bästa sporter (medaljer i förhållande till deltagare)
+deltag=df_ger["Sport"].value_counts()       # antal tyska deltagare per sport
+medalj=df_ger_medals["Sport"].value_counts()    # antal tyska medaljörer per sport
+
+ger_deltagare=deltag.to_frame(name="Deltagare")     
+ger_medaljer=medalj.to_frame(name="Medaljer")
+ger_percent=pd.concat([ger_deltagare, ger_medaljer], axis=1)
+ger_percent["Procent"]=100*ger_percent["Medaljer"]/ger_percent["Deltagare"]
+ger_percent=ger_percent.sort_values("Procent", ascending=False)
+
+ger_percent=ger_percent[(ger_percent["Deltagare"]>=20) & (ger_percent["Medaljer"]>=1)]
+ger_percent1=ger_percent.head(19).rename(columns={"Procent": "Best"})
+ger_percent2=ger_percent.tail(19).rename(columns={"Procent": "Worst"})
+
+bestworst=pd.concat([ger_percent1, ger_percent2])
+colors=["#cc3333"]
+
 
 # Definiera funktion för att generera graf för länders prestation över tid
 def länder_prestation_över_tid_graph():
@@ -49,6 +75,7 @@ def langd_och_vikt_func():
     df_vikt=df_ger[df_ger["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
     fig = px.scatter(df_vikt, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], animation_frame="Sex", color="Sport", opacity=.4)
     return fig
+
 
 
 # Skapa Dash-app
@@ -73,6 +100,15 @@ app.layout = html.Div([
             html.Button('Visa längd och vikt', id='langd-vikt-button', n_clicks=0),
             dcc.Graph(id='langd-vikt-graph'),],style={"padding": 10, "flex":1, })
             ], style={"display": "flex", "flexDirection":"row"}),
+
+    html.Div([ 
+        html.Div([
+            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio'),
+            dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),  
+        html.Div([
+            dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio'),
+            dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),                 
+            ], style={"display": "flex", "flexDirection":"row"}),
     
     ])
 
@@ -84,7 +120,26 @@ app.layout = html.Div([
     [Input('controls-and-radio-item', 'value')]
 )
 def update_graph(col_chosen):
-    fig = px.line(df_cc_delt, x="Games", y=col_chosen, width=400)
+    fig = px.line(df_cc_delt, x="Games", y=col_chosen)
+    return fig
+
+# Pie chart med top 10-sporter
+@app.callback(
+    Output('pie-graph', 'figure'),
+    [Input('pie-radio', 'value')]
+)
+def update_graph(val):
+    fig = px.pie(ger_delt_och_med, values=val, names=ger_delt_och_med.index, title="Tysklands 10 största sporter")
+    return fig
+
+# Bar chart med procentuellt bästa/sämsta sporterna
+@app.callback(
+    Output('bar-graph', 'figure'),
+    [Input('bar-radio', 'value')]
+)
+def update_graph(barval):
+    fig=px.histogram(bestworst, x=bestworst.index, y=barval, color_discrete_sequence=colors, title="Tysklands procentuellt bästa och sämsta grenar")
+    fig.update_layout(yaxis_title="Procent")
     return fig
 
 
@@ -109,6 +164,7 @@ def update_lander_prestation_graph(n_clicks):
         return länder_prestation_över_tid_graph()
     else:
         return {}
+    
 @app.callback(
     Output("ålders-fördelning", "figure"),
     [Input("ålders-fördelning-button", "n_clicks")]
