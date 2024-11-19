@@ -43,21 +43,65 @@ fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis
 #----------------------------------------------------------------------------------------------------------------
 
 app = Dash()
+external_stylesheets = [dbc.themes.CERULEAN]
 
-app.layout = [
-    html.H1(children="Olympiska Spelen", style={'textAlign':'center'}),
-    html.H2(children="Tyskland", style={'textAlign':'center'}),
+app.layout = html.Div([
+    html.H1(children = "HELLO DASH!!", 
+            style={"textAlign": "Center",
+                   "color": "red"}
+                   ),
+                   html.Img(src='../assets/os_ringar.npg', style={'width': '50%'}),
+    html.H1(""),
+    html.Hr(),
+    html.Div(children = "Dash - A Data product development framework from plotly",
+             style= {
+                 "textAlign": "center",
+                 "color": "green"}
+             ),
+
+    dcc.Graph(
+        id = "sample-graph",
+        figure = {
+            "data": [
+                {"x" : [5,6,7], "y": [12,15,18], "type": "bar", "name": "first chart"},
+                {"x" : [5,6,7], "y": [17,22,27], "type": "bar", "name": "first chart"}
+            ],
+            "layout": {
+                "title": "Simple barchart"            
+            }
+        }
+    )
+])
 
 
-    html.Div([
-        html.Div([
-            dcc.Graph(figure=fig, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
-        html.Div([
-            dcc.Graph(figure= fig1, id='lander-prestation-graph'),],style={"padding": 10, "flex":1, })
-            ], style={"display": "flex", "flexDirection":"row"}),
-    ]
+# app.layout = [
+#     html.H1(children="Olympiska Spelen", style={'textAlign':'center'}),
+#     html.H2(children="Tyskland", style={'textAlign':'center'}),
 
 
+#     html.Div([
+#         html.Div([
+#             dcc.Graph(figure=fig, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
+#         html.Div([
+#             dcc.Graph(figure= fig1, id='lander-prestation-graph'),],style={"padding": 10, "flex":1, })
+#             ], style={"display": "flex", "flexDirection":"row"}),
+#     ]
+
+# app.layout = html.Div([
+#     html.H1(children="Olympiska Spelen", style={'textAlign':'center'}),
+#     html.Hr(),
+#      html.H2(children="Tyskland", style={'textAlign':'center'}),
+#      html.Hr(),
+#          html.Div([
+#              html.Div([
+#                 dcc.Graph(figure=fig, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
+#                 html.Div([
+#                     dcc.Graph(figure= fig1, id='lander-prestation-graph'),],style={"padding": 10, "flex":1, })
+#             ]   ,style={"display": "flex", "flexDirection":"row"})
+#             ]) 
+#          ])
+#      ])
+# ])
 
 
 if __name__ == '__main__':
