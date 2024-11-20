@@ -37,10 +37,13 @@ def update_graph(sport):
     df_sport = df[df["Sport"] == sport]
     df_sport = df_sport.dropna()
 
+    # SKapar en hexadecimal färgkod och slumpar dessa i grafen.
     colors = ["#" + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(len(df_sport))]
 
+    # Räkna antalet deltagare vid varje ålder.
+    age_counts = df_sport[df_sport["Age"].notnull()]["Age"].value_counts().sort_index()
     # Skapa en histogramgraf
-    fig = px.histogram(df_sport, x="Age", title="Åldersfördelning i " + sport, opacity=.4, color_discrete_sequence=colors)
+    fig = px.line(x=age_counts.index, y=age_counts.values, title="Åldersfördelning i " + sport, labels={"x": "Ålder", "y": "Antal deltagare"}, color_discrete_sequence=colors)
 
     # Returnera grafen
     return fig
