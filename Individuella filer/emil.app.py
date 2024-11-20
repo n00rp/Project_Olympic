@@ -9,22 +9,6 @@ import plotly.graph_objects as go
 #--------------------------------------------------------------------------------------------------------------
 df = pd.read_csv("athlete_events.csv")
 
-# """ Tabell på antal medaljer per individ i tyskland """
-# ger_df = df[df["NOC"] == "GER"]
-# ger_df1 = pd.concat([ger_df,pd.get_dummies(df["Medal"])],axis = 1)
-# ger_indv_medals = ger_df1.groupby("NOC").sum()[["Gold","Silver","Bronze"]].sort_values("Gold",ascending=False).reset_index()
-
-# """ Tabell på medaljer som nation i Tyskland """
-# # Filtrering på alla dubletter som förekommer av valda kolumner
-# temp_df = df.dropna(subset=["Medal"])
-# temp_df = df.drop_duplicates(subset=["Team","NOC","Games","Year","City","Sport","Event","Medal"])
-# # Droppar alla nan i medaljkolumnen, listar alla länder
-# cleaned_df =temp_df.dropna(subset=["Medal"])
-# ger_df_team = cleaned_df[cleaned_df["NOC"] == "GER"]
-# cleaned_df1 = pd.concat([ger_df_team, pd.get_dummies(ger_df_team["Medal"], prefix='Medal')], axis=1)
-# cleaned_df1
-# ger_team_medals = cleaned_df1.groupby("NOC").sum()[["Medal_Gold", "Medal_Silver", "Medal_Bronze"]].sort_values("Medal_Gold", ascending=False).reset_index()
-
 """ Tabell på antal medaljer per individ i tyskland """
 ger_df = df[df["NOC"] == "GER"]
 medal = ger_df["Medal"].isin(["Gold", "Silver", "Bronze"])
@@ -35,44 +19,33 @@ color1 = ["silver", "orange", "gold"]
 temp_df = ger_df.drop_duplicates(subset=["Team","NOC","Games","Year","City","Sport","Event","Medal"])
 ny_team_variabel = temp_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 ny_team_variabel = temp_df[ny_team_variabel]
-fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=500, height=500)
-fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
+
+""" Tabell på medaljer """
+ny_team_variabel["Medaltot"] = 1
+df_grouped = ny_team_variabel.groupby(['Year', 'Medal']).sum().reset_index()
+df_pivot = df_grouped.pivot(index='Year', columns='Medal', values='Medaltot')# Pivot = Year blir x-axeln och Medal blir kolumner med en valör i varje. Values(Medeltot) får summan av varje valör per år.
+df_pivot_g = df_pivot["Gold"]
+df_pivot_s = df_pivot["Silver"]
+df_pivot_b = df_pivot["Bronze"]
 
 #----------------------------------------------------------------------------------------------------------------
 
 def medalj_individ():
-    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=500, height=500)
+    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=550, height=650)
     fig.update_layout(title="Tyska Individuella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
     return dcc.Graph(id="medalj_individ", figure=fig)
 
 def medalj_nation():
-    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=500, height=500)
+    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=550, height=650)
     fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
     return dcc.Graph(id="medalj_nation", figure=fig)
 
 #------------------------------------------------------------------------------------------------------------------
 
-# dash_table.DataTable(
-#     cities = [
-#             {"name": "Stad", "id": "stad"},
-#             {"name": "Typ av OS", "id": "os_type"},
-#             {"name": "År", "id": "year"}
-#         ],
-#     data=[
-#             {"stad": "Berlin", "os_type": "Sommar OS", "year": "1916 (Inställt)"}
-#             {"stad": "Berlin", "os_type": "Sommar OS", "year": "1936"}
-#             {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"}
-#         ],
-#         style_table={'width': '50%', 'margin': '0 auto'},  # Centrera tabellen på sidan och sätt bredd
-#         style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'},  # Rubriker
-#         style_cell={'textAlign': 'center', 'padding': '10px'},  # Cellstil
-#         )
-
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = html.Div([
 
-    # Övergripande Card högst upp på sidan
     dbc.Card(
         dbc.CardBody([
             html.H2("Välkommen till Olympiska Spelen!", className="card-title"),
@@ -104,14 +77,13 @@ app.layout = html.Div([
                         dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px'})
                     ])
                 ]),
-                className="border-primary mb-3", style={"max-width": "100%", "margin": "0 auto"}
+                className="mb-3", style={"max-width": "100%", "margin": "0 auto"}
             ),
-            width=5  # 8 delar av en 12-kolumn layout för stort card
+            width=4  # 8 delar av en 12-kolumn layout för stort card
         ),
 
-        # Liten Col för de tre små cardsen (4/12 bredd)
+
         dbc.Col(
-            # Här placeras de tre små cardsen vertikalt i samma kolumn
             children=[
                 dbc.Card(
                     dbc.CardBody([
@@ -162,63 +134,100 @@ app.layout = html.Div([
                 )
             ],
             width=2  # 4 delar av en 12-kolumn layout för den högerkolumnen med små cards
-        ),
+        ),# Kolumnen stängs här
 
-dbc.Col(
-    children=[
-        # Card med tabellen
-        dbc.Card(
-            dbc.CardBody([
-                html.H4("Tysklands OS städer", style={"textAlign": "center"}),
-                dash_table.DataTable(
-                    columns=[
-                        {"name": "Stad", "id": "stad"},
-                        {"name": "Typ av OS", "id": "os_type"},
-                        {"name": "År", "id": "year"}
-                    ],
-                    data=[
-                        {"stad": "Berlin", "os_type": "Sommar OS", "year": "1916 (Inställt)"},
-                        {"stad": "Berlin", "os_type": "Sommar OS", "year": "1936"},
-                        {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"},
-                    ],
-                    style_table={'width': '100%', 'margin': '0 auto'},
-                    style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'},
-                    style_cell={'textAlign': 'center', 'padding': '10px'},
-                )
-            ]),
-            className="mb-3", style={"height": "auto", "width": "100%"}  # Flexibelt kort för tabellen
-        ),
-
-        # Card med dropdown
-        dbc.Card(
-            dbc.CardBody([
-                dcc.Dropdown(options=[
+        dbc.Col(
+        children=[
+            # Card med tabellen
+            dbc.Card(
+                dbc.CardBody([
+                    html.H4("Tysklands OS städer", style={"textAlign": "center"}),
+                    dash_table.DataTable(
+                        columns=[
+                            {"name": "Stad", "id": "stad"},
+                            {"name": "Typ av OS", "id": "os_type"},
+                            {"name": "År", "id": "year"}
+                        ],
+                        data=[
+                            {"stad": "Berlin", "os_type": "Sommar OS", "year": "1916 (Inställt)"},
+                            {"stad": "Berlin", "os_type": "Sommar OS", "year": "1936"},
+                            {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"},
+                        ],
+                        style_table={'width': '100%', 'margin': '0 auto'},
+                        style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'},
+                        style_cell={'textAlign': 'center', 'padding': '10px'},
+                    )
+                ]),
+                className="mb-3", style={"height": "auto", "width": "100%"}  # Flexibelt kort för tabellen
+            ),
+            dbc.Card(
+                dbc.CardBody([
+                    dcc.Dropdown(options=[
                             {"label": "Gold", "value": "Gold"},
                             {"label": "Silver", "value": "Silver"},
                             {"label": "Bronze", "value": "Bronze"}
                         ],  value= "Gold", id="dropdown-item"
-                ),
-                html.Div(id="dropdown-item-output"),
-                dcc.Graph(id="dd_graph")
-            ]),
-            className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
+                    ),
+                    dcc.Graph(id="dd_graph")
+                ])
+            )
+        ]
         )
-    ],
-    width=3  # 3 delar av en 12-kolumn layout för tabellen och dropdown
-)
-    ]),
+        #skriv en ny kolumn här
+
+
+    ]),# Raden stängs här
 
     dbc.Row([
         dbc.Col([
             dbc.Card(
-                dbc.CardBody([
-                    dcc.Graph(figure={}, id="line-fig", style={"height": "400px", "width": "100%"})
-                ]),
-                className="mb-3", style={"width": "100%"}
-            )  
+                    dbc.CardBody([
+                        dcc.Dropdown(options=[
+                                    {"label": "Man", "value": "Man"},
+                                    {"label": "Kvinna", "value": "Kvinna"},
+                                ],  value= "Man", id="dropdown-gender-output"
+                        ),
+                        dcc.Graph(id="dd_gender_graph")
+                    ]),
+                    className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
+                )  
+        ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
+        ),
+        dbc.Col([
+            dbc.Card(
+                    dbc.CardBody([
+                        dcc.Dropdown(options=[
+                                    {"label": "Sommar", "value": "Sommar"},
+                                    {"label": "Vinter", "value": "Vinter"},
+                                ],  value= "Man", id="dropdown-gender"
+                        ),
+                        html.Div(id="dropdown-season_emil"),
+                        dcc.Graph(id="emil_top_sports")
+                    ]),
+                    className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
+                )
+        ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
+        )
+    ]), # Raden stängs här
+
+        dbc.Row([
+        dbc.Col([
+            html.Hr(),
+            html.H1("ALLA NATIONER", style={"textAlign": "center", "color": "black"}),
+            html.Hr(),
         ])
-    ])
-])
+    ],className="mb-3")
+]) # App.layout stängs här
+
+
+
+
+
+
+
+
+
+
 
 @callback(
     Output("dd_graph", "figure"),
@@ -227,13 +236,21 @@ dbc.Col(
 
 def update_graph(medal):
     if medal == "Gold":
-        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Gold")
+        fig = px.line(df_pivot_g, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
     elif medal == "Silver":
-        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Silver")
+        fig = px.line(df_pivot_s, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
     elif medal == "Bronze":
-        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Bronze")
+        fig = px.line(df_pivot_b, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
     return fig
 
+
+@callback(
+    Output("dd_gender_graph", "figure"),
+    Input("dropdown-gender-output", "value")
+)
+
+def update_graph(gender):
+    pass
 
 if __name__ == '__main__':
     app.run(debug=True)
