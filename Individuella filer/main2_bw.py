@@ -6,6 +6,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.graph_objs as go
 import seaborn as sns
+import dash_bootstrap_components as dbc
 
 # Läs in data
 df = pd.read_csv("../athlete_events.csv")
@@ -43,7 +44,7 @@ def ålders_fördelning_func():
 
 
 # Skapa Dash-app
-app = dash.Dash()
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # Definiera app-layout
 app.layout = html.Div([
@@ -72,6 +73,23 @@ app.layout = html.Div([
             dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio'),
             dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),                 
             ], style={"display": "flex", "flexDirection":"row"}),
+
+    dbc.Container([
+        dcc.Markdown("Åldersfördelning i respektive sport"),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Dropdown(id='sport',
+                         options=[x for x in ["Sailing", "Curling", "Football", "Handball"]],
+                         multi=True,
+                         value=['Curling', 'Handball'])
+                        ], width=8)
+                    ]),
+            dbc.Row([
+                dbc.Col([
+                    dcc.Graph(id='figure1')
+                        ], width = 8)
+                    ])
+                    ])
     
     ])
 
@@ -157,6 +175,16 @@ def update_graph(barval):
     return fig
 
 
+
+@app.callback(
+    Output('figure1','figure'),
+    Input('sport', 'value')
+)
+def age_histogram(sport_selected):
+    df_filtered = df[df.Sport.isin(sport_selected)]
+    fig = px.histogram(df_filtered, x='Age', color='Sport', opacity=.4, range_x=[10,70], range_y=[0,1000], barmode="overlay")
+
+    return fig
     
 # Kör appen
 if __name__ == '__main__':
