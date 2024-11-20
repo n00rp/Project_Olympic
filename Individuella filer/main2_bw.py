@@ -68,10 +68,13 @@ app.layout = html.Div([
         
     html.Div([    
         html.Div([
-            dcc.Graph(figure=fig3),],style={"padding": 10, "flex":1, }),
+            dcc.Graph(figure=fig3),],style={"padding": 1, "flex":1, }),
         html.Div([
             dcc.RadioItems(options=["M", "F"], value="M", id='langdvikt-radio'),
-            dcc.Graph(figure={}, id="langdvikt-graph"),],style={"padding": 10, "flex":1, })
+            dcc.Graph(figure={}, id="langdvikt-graph"),],style={"padding": 1, "flex":1, }),
+        html.Div([
+            dcc.RadioItems(options=["wgames", "sgames"], value="wgames", id='coldwar-radio'),
+            dcc.Graph(figure={}, id="coldwar-graph"),],style={"padding": 1, "flex":1, })
             ], style={"display": "flex", "flexDirection":"row"}),
 
     html.Div([ 
@@ -121,6 +124,32 @@ def cross_country_countries(cc_yval):
     cross_country_lander=pd.DataFrame(cc_delt, columns=["Games",  "Deltagarländer", "Medaljländer"])
     fig = px.line(cross_country_lander, x="Games", y=cc_yval)
     return fig    
+
+
+# Stapeldiagram med kalla kriget
+@app.callback(
+    Output('coldwar-graph', 'figure'),
+    [Input('coldwar-radio', 'value')]
+)
+
+def coldwar_func(sw_choice):
+    df_frg_gdr=df[df["NOC"].isin(["FRG", "GDR"])]
+    games_cold_war_s=["1968 Summer", "1972 Summer", "1976 Summer", "1980 Summer", "1984 Summer", "1988 Summer"]
+    games_cold_war_w=["1968 Winter", "1972 Winter", "1976 Winter", "1980 Winter", "1984 Winter", "1988 Winter"]
+    df_frg_gdr=df_frg_gdr[df_frg_gdr["Year"].isin([1968, 1972, 1976, 1980, 1984, 1988])]
+    df_frg_gdr=df_frg_gdr[df_frg_gdr["Medal"].isin(["Gold", "Silver", "Bronze"])]
+    df_frg_gdr["Medaltot"]=1
+    df_frg_gdr["wgames"]=None
+    df_frg_gdr["sgames"]=None
+    mask1=df_frg_gdr["Games"].isin(games_cold_war_w)
+    mask2=df_frg_gdr["Games"].isin(games_cold_war_s)
+    df_frg_gdr.loc[mask1, "wgames"]=df_frg_gdr.loc[mask1, "Games"]
+    df_frg_gdr.loc[mask2, "sgames"]=df_frg_gdr.loc[mask2, "Games"]
+    df_frg_gdr=df_frg_gdr.sort_values(by=["Year"])
+
+    fig=px.histogram(df_frg_gdr, x=sw_choice, y="Medaltot", color="NOC", barmode="group")
+    fig.update_xaxes(categoryorder="array", categoryarray=games_cold_war_s)
+    return fig
 
 
 # Scatter med längd och vikt
