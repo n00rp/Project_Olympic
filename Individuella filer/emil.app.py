@@ -92,11 +92,17 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 # ])
 
 app.layout = html.Div([
-    # Lägg till en bild
-    html.Img(src='/assets/os_ringar.png', style={'width': '30%', 'display': 'block', 'margin': '0 auto'}),
 
-    # Lägg till padding-top och bakgrundsfärg
-    html.Div(className="pt-5"),
+    # Övergripande Card högst upp på sidan
+    dbc.Card(
+        dbc.CardBody([
+            html.H2("Välkommen till Olympiska Spelen!", className="card-title"),
+            html.P("Utforska medaljdata för Tyskland och andra nationer i de Olympiska spelen.", className="card-text"),
+            html.Img(src='/assets/os_ringar.png', style={'width': '15%', 'display': 'block', 'margin': '0 auto'}),
+        ]),
+        className="mb-4 border-primary",  # Border och marginal
+        style={"margin-top": "20px", "textAlign": "center"}
+    ),
 
     # Rubrik för OLYMPISKA SPELEN
     html.H1("OLYMPISKA SPELEN", style={"textAlign": "center", "color": "blue"}),
@@ -104,78 +110,104 @@ app.layout = html.Div([
     # Horisontell linje
     html.Hr(),
 
-    # Lägg till padding-top och bakgrundsfärg
-    html.Div(className="pt-5"),
-
     # Rubrik för nästa sektion
     html.H1("TYSKLAND", style={"textAlign": "center", "color": "black"}),
 
-    # Flexbox container
-    html.Div(
-        className="d-flex",  # Använd flexbox för att placera cards sida vid sida
-        children=[
-            # Card till vänster (30% bredd)
-            html.Div(
-                dbc.Card(
-                    dbc.CardBody([
-                        html.H4("Tyska Medaljer", className="card-title"),
-                        dcc.Tabs([
-                            dcc.Tab(label="Medaljer 1", children=[medalj_individ()], style={'padding': '20px'}),
-                            dcc.Tab(label="Medaljer 2", children=[medalj_nation()], style={'padding': '20px'})
-                        ])
-                    ]),
-                    className="border-primary mb-3", 
-                    style={"max-width": "100%", "margin": "0 auto"}
-                ),
-                style={"width": "30%", "padding": "10px"}  # 30% bredd på vänster card
+    # Flexbox container för vänster och höger card
+    dbc.Row([
+        # Card till vänster (30% bredd)
+        dbc.Col(
+            dbc.Card(
+                dbc.CardBody([
+                    html.H4("Tyska Medaljer", className="card-title"),
+                    dcc.Tabs([
+                        dcc.Tab(label="Individuella medaljer", children=[medalj_individ()], style={'padding': '20px'}),
+                        dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px'})
+                    ])
+                ]),
+                className="border-primary mb-3", 
+                style={"max-width": "100%", "margin": "0 auto"}
             ),
-            
-            # Card till höger (70% bredd)
-            html.Div(
-                dbc.Card(
-                    dbc.CardBody([
-                        # Flexbox container för små cards
-                        html.Div(
-                            className="d-flex flex-column",  # Flexbox och vertikal layout
-                            children=[
-                                # Första lilla cardet
-                                dbc.Card(
-                                    dbc.CardBody([
-                                        html.Img(src='/assets/silver.png', style={'width': '7%'}),
-                                        html.H4("745", className="card-text")
-                                    ]),
-                                    className="mb-3",  # Marginal mellan cards
-                                    style={"height": "100%"}  # Gör alla cards lika höga
-                                ),
-
-                                # Andra lilla cardet
-                                dbc.Card(
-                                    dbc.CardBody([
-                                        html.Img(src='/assets/silver.png', style={'width': '7%'}),
-                                        html.H4("674", className="card-text")
-                                    ]),
-                                    className="mb-3",  # Marginal mellan cards
-                                    style={"height": "100%"}
-                                ),
-
-                                # Tredje lilla cardet
-                                dbc.Card(
-                                    dbc.CardBody([
-                                        html.Img(src='/assets/bronz.png', style={'width': '7%'}),
-                                        html.H4("746", className="card-text")
-                                    ]),
-                                    className="mb-3",  # Marginal mellan cards
-                                    style={"height": "100%"}
-                                ),
-                            ]
-                        ),
-                    ]),
-
+            width=4  # 30% bredd på vänster card (i ett system med 12 kolumner)
+        ),
+        
+        # Små cards till höger (70% bredd), vertikalt
+        dbc.Col(
+            dbc.Row([
+                # Första lilla cardet
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody([
+                            # Flexbox för bild och text
+                            html.Div(
+                                className="d-flex align-items-center",  # Flexbox för att hålla bilden och texten horisontellt
+                                children=[
+                                    html.Img(src='/assets/silver.png', style={'width': '30%', 'margin-right': '10px'}),  # Bild till vänster
+                                    html.Div([
+                                        html.H4("745", className="card-text"),  # Text till höger om bilden
+                                        html.P("Guld medaljer", className="card-text")  # Text som beskriver medaljen
+                                    ])
+                                ]
+                            ),
+                        ]),
+                        className="mb-3",  # Marginal mellan cards
+                        style={"width": "15%", "height": "150px", "margin": "0"}  # Gör alla cards lika höga och bredden är 100%, ingen marginal
+                    ),
+                    width=12,  # Kolumnen är 100% av raden
+                    style={"padding": "0"}  # Ta bort padding från kolumnen
                 ),
+                
+                # Andra lilla cardet
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody([
+                            # Flexbox för bild och text
+                            html.Div(
+                                className="d-flex align-items-center",  # Flexbox för att hålla bilden och texten horisontellt
+                                children=[
+                                    html.Img(src='/assets/silver.png', style={'width': '30%', 'margin-right': '10px'}),  # Bild till vänster
+                                    html.Div([
+                                        html.H4("674", className="card-text"),  # Text till höger om bilden
+                                        html.P("Silver medaljer", className="card-text")  # Text som beskriver medaljen
+                                    ])
+                                ]
+                            ),
+                        ]),
+                        className="mb-3",  # Marginal mellan cards
+                        style={"width": "15%", "height": "140px", "margin": "0"}  # Gör alla cards lika höga och bredden är 100%, ingen marginal
+                    ),
+                    width=12,
+                    style={"padding": "0"}  # Ta bort padding från kolumnen
+                ),
+                
+                # Tredje lilla cardet
+                dbc.Col(
+                    dbc.Card(
+                        dbc.CardBody([
+                            # Flexbox för bild och text
+                            html.Div(
+                                className="d-flex align-items-center",  # Flexbox för att hålla bilden och texten horisontellt
+                                children=[
+                                    html.Img(src='/assets/bronz.png', style={'width': '35%', 'margin-right': '10px'}),  # Bild till vänster
+                                    html.Div([
+                                        html.H4("746", className="card-text"),  # Text till höger om bilden
+                                        html.P("Bronze medaljer", className="card-text")  # Text som beskriver medaljen
+                                    ])
+                                ]
+                            ),
+                        ]),
+                        className="mb-3",  # Marginal mellan cards
+                        style={"width": "15%", "height": "130px", "margin": "0"}  # Gör alla cards lika höga och bredden är 100%, ingen marginal
+                    ),
+                    width=12,
+                    style={"padding": "0"}  # Ta bort padding från kolumnen
+                ),
+            ], className="g-0"),  # g-0 eliminerar mellanrum mellan kolumnerna
+            width=8,  # Totalt 70% bredd på höger sektion
+            style={"padding": "0"}  # Ta bort padding från hela kolumnen
+        )
+    ]),
 
-            ),
-        ]
-    ),
 ])
 
 
