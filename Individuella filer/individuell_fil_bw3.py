@@ -3,21 +3,21 @@ import pandas as pd
 import plotly.express as px
 import dash_bootstrap_components as dbc
 
-# Data
-df = px.data.gapminder()
+# Läs in data
+df = pd.read_csv("../athlete_events.csv")
 
 # Instantiate the App
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # App Layout
 app.layout = dbc.Container([
-    dcc.Markdown("# Befolkning i respektive länder"),
+    dcc.Markdown("Åldersfördelning i respektive sport"),
     dbc.Row([
         dbc.Col([
-            dcc.Dropdown(id='länder',
-                         options=[x for x in df.country.unique()],
+            dcc.Dropdown(id='sport',
+                         options=[x for x in ["Sailing", "Curling", "Football", "Handball"]],
                          multi=True,
-                         value=['Canada', 'Brazil'])
+                         value=['Curling', 'Handball'])
         ], width=8)
     ]),
     dbc.Row([
@@ -31,11 +31,11 @@ app.layout = dbc.Container([
 # Configure Callback
 @app.callback(
     Output('figure1','figure'),
-    Input('länder', 'value')
+    Input('sport', 'value')
 )
-def udpate_graph(countries_selected):
-    df_filtered = df[df.country.isin(countries_selected)]
-    fig = px.line(df_filtered, x='year', y='lifeExp', color='country')
+def udpate_graph(sport_selected):
+    df_filtered = df[df.Sport.isin(sport_selected)]
+    fig = px.histogram(df_filtered, x='Age', color='Sport', opacity=.4, range_x=[10,70], range_y=[0,1000], barmode="overlay")
 
     return fig
 
