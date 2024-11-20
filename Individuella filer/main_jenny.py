@@ -1,23 +1,15 @@
-import dash
-from dash import dcc
-from dash import html
-from dash import html
-import dash_html_components as html
-import plotly.express as px
-import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.graph_objs as go
-import seaborn as sns
-import hashlib as hl
-import numpy as np
+# 1. Import packages
+from dash import Dash, dcc
+import dash_bootstrap_components as dbc
 
+# 2. Initialise the App
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
-# Läs in data
-file = pd.read_csv("Project_Olympic/athlete_events.csv")
+# 3. App Layout
+app.layout = dbc.Container([
+    dcc.Markdown(children='My First App', style={'textAlign': 'left', 'color': 'Pink', 'fontSize': 30})
+])
 
-# anonymisera kolumnerna med idrotternas namn
-df = file.copy()
-df["Name"] = df["Name"].apply(lambda x: hl.sha256(x.encode()).hexdigest())
-
-df_sporter = df[df["Sport"].isin(["Cross Country Skiing", "Football", "Sailing", "Handball"])]
-df_sporter = df_sporter.dropna()
+# 4. Run the App
+if __name__ == '__main__':
+    app.run_server()
