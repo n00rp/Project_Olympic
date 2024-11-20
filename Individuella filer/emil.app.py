@@ -37,6 +37,7 @@ ny_team_variabel = temp_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 ny_team_variabel = temp_df[ny_team_variabel]
 fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=500, height=500)
 fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
+
 #----------------------------------------------------------------------------------------------------------------
 
 def medalj_individ():
@@ -163,40 +164,75 @@ app.layout = html.Div([
             width=2  # 4 delar av en 12-kolumn layout för den högerkolumnen med små cards
         ),
 
-        dbc.Col(
-            children=[
-                # Card med tabellen
-                dbc.Card(
-                    dbc.CardBody([
-                        html.H4("Tysklands OS städer", style={"textAlign": "center"}),
-                        dash_table.DataTable(
-                            columns=[
-                                {"name": "Stad", "id": "stad"},
-                                {"name": "Typ av OS", "id": "os_type"},
-                                {"name": "År", "id": "year"}
-                            ],
-                            data=[
-                                {"stad": "Berlin", "os_type": "Sommar OS", "year": "1916 (Inställt)"},
-                                {"stad": "Berlin", "os_type": "Sommar OS", "year": "1936"},
-                                {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"},
-                            ],
-
-                        )
-                    ]),
-                    className="mb-3", style={"height": "auto", "width": "150%"}  # Flexibelt kort för tabellen
-                ),
-            dbc.Card(
+dbc.Col(
+    children=[
+        # Card med tabellen
+        dbc.Card(
             dbc.CardBody([
-            dcc.Graph(figure={}, id="line-fig", style={"height": "400px", "width": "100%"})
+                html.H4("Tysklands OS städer", style={"textAlign": "center"}),
+                dash_table.DataTable(
+                    columns=[
+                        {"name": "Stad", "id": "stad"},
+                        {"name": "Typ av OS", "id": "os_type"},
+                        {"name": "År", "id": "year"}
+                    ],
+                    data=[
+                        {"stad": "Berlin", "os_type": "Sommar OS", "year": "1916 (Inställt)"},
+                        {"stad": "Berlin", "os_type": "Sommar OS", "year": "1936"},
+                        {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"},
+                    ],
+                    style_table={'width': '100%', 'margin': '0 auto'},
+                    style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'},
+                    style_cell={'textAlign': 'center', 'padding': '10px'},
+                )
             ]),
-            className="mb-3", style={"width": "150%"}  # Flexibelt kort för grafen
-        )
-            ],
-            width=3  # 3 delar av en 12-kolumn layout för tabellen och grafen
-        ) 
-    ])
+            className="mb-3", style={"height": "auto", "width": "100%"}  # Flexibelt kort för tabellen
+        ),
 
+        # Card med dropdown
+        dbc.Card(
+            dbc.CardBody([
+                dcc.Dropdown(options=[
+                            {"label": "Gold", "value": "Gold"},
+                            {"label": "Silver", "value": "Silver"},
+                            {"label": "Bronze", "value": "Bronze"}
+                        ],  value= "Gold", id="dropdown-item"
+                ),
+                html.Div(id="dropdown-item-output"),
+                dcc.Graph(id="dd_graph")
+            ]),
+            className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
+        )
+    ],
+    width=3  # 3 delar av en 12-kolumn layout för tabellen och dropdown
+)
+    ]),
+
+    dbc.Row([
+        dbc.Col([
+            dbc.Card(
+                dbc.CardBody([
+                    dcc.Graph(figure={}, id="line-fig", style={"height": "400px", "width": "100%"})
+                ]),
+                className="mb-3", style={"width": "100%"}
+            )  
+        ])
+    ])
 ])
+
+@callback(
+    Output("dd_graph", "figure"),
+    Input("dropdown-item", "value")
+)
+
+def update_graph(medal):
+    if medal == "Gold":
+        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Gold")
+    elif medal == "Silver":
+        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Silver")
+    elif medal == "Bronze":
+        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Bronze")
+    return fig
 
 
 if __name__ == '__main__':
