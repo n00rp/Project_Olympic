@@ -24,12 +24,22 @@ df_ger=df[df["NOC"]=="GER"]                                                 # Al
 df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]    # Alla tyska medaljörer
 
 # Grafer utan callbacks
+
+# Länder prestation över tid
 lander_prestation_over_tid = df[(df['NOC'].isin(['GER', 'ITA', 'TUR', 'CHN', 'USA', 'FIN'])) & (df['Season'] == "Summer")].groupby(["NOC", "Year"])["Medal"].count().unstack().fillna(0)
 fig2 = go.Figure()
 for noc in lander_prestation_over_tid.index:
     noc_data = lander_prestation_over_tid.loc[noc]
     fig2.add_trace(go.Scatter(x=noc_data.index, y=noc_data.values, name=noc))
 fig2.update_layout(title="Länders prestation över tid (Sommar-OS)", xaxis_title="År", yaxis_title="Medaljer")
+
+# Länder som tagit medalj i längdskidor
+df_skidor=df[df["Sport"]=="Cross Country Skiing"]
+df_skidor_medaljer=df_skidor[df_skidor["Medal"].isin(["Gold", "Silver", "Bronze"])]
+df_skidor_medaljer["NOC"].value_counts()
+
+fig3=px.bar(df_skidor_medaljer["NOC"].value_counts(), labels={"NOC": "Land", "value": "Antal medaljer"}, title=("Länder som tagit medalj i längdskidor"))
+fig3.update_layout(showlegend=False)
 
 
 
@@ -53,13 +63,12 @@ app.layout = html.Div([
             dcc.RadioItems(options=["Deltagarländer", "Medaljländer"], value="Deltagarländer", id='controls-and-radio-item'),
             dcc.Graph(figure={}, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
         html.Div([
-            dcc.Graph(figure=fig2),],style={"padding": 10, "flex":1, }),
+            dcc.Graph(figure=fig2),],style={"padding": 10, "flex":1, })
             ], style={"display": "flex", "flexDirection":"row"}),
         
     html.Div([    
         html.Div([
-            html.Button('Visa åldersfördelning', id='ålders-fördelning-button', n_clicks=0),
-            dcc.Graph(id='ålders-fördelning'),],style={"padding": 10, "flex":1, }),
+            dcc.Graph(figure=fig3),],style={"padding": 10, "flex":1, }),
         html.Div([
             dcc.RadioItems(options=["M", "F"], value="M", id='langdvikt-radio'),
             dcc.Graph(figure={}, id="langdvikt-graph"),],style={"padding": 10, "flex":1, })
@@ -113,15 +122,6 @@ def cross_country_countries(cc_yval):
     fig = px.line(cross_country_lander, x="Games", y=cc_yval)
     return fig    
 
-@app.callback(
-    Output("ålders-fördelning", "figure"),
-    [Input("ålders-fördelning-button", "n_clicks")]
-)
-def ålders_fördelning(n_clicks):
-    if n_clicks > 0:
-        return ålders_fördelning_func()
-    else:
-        return {}
 
 # Scatter med längd och vikt
 @app.callback(
