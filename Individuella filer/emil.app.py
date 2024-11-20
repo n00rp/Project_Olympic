@@ -37,6 +37,7 @@ ny_team_variabel = temp_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 ny_team_variabel = temp_df[ny_team_variabel]
 fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=500, height=500)
 fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
+
 #----------------------------------------------------------------------------------------------------------------
 
 def medalj_individ():
@@ -49,47 +50,25 @@ def medalj_nation():
     fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
     return dcc.Graph(id="medalj_nation", figure=fig)
 
+#------------------------------------------------------------------------------------------------------------------
+
+# dash_table.DataTable(
+#     cities = [
+#             {"name": "Stad", "id": "stad"},
+#             {"name": "Typ av OS", "id": "os_type"},
+#             {"name": "År", "id": "year"}
+#         ],
+#     data=[
+#             {"stad": "Berlin", "os_type": "Sommar OS", "year": "1916 (Inställt)"}
+#             {"stad": "Berlin", "os_type": "Sommar OS", "year": "1936"}
+#             {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"}
+#         ],
+#         style_table={'width': '50%', 'margin': '0 auto'},  # Centrera tabellen på sidan och sätt bredd
+#         style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'},  # Rubriker
+#         style_cell={'textAlign': 'center', 'padding': '10px'},  # Cellstil
+#         )
+
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-
-
-# app.layout = html.Div([
-#     # Lägg till en bild
-#     html.Img(src='/assets/os_ringar.png', style={'width': '30%', 'display': 'block', 'margin': '0 auto'}),
-
-#     # Lägg till padding-top och bakgrundsfärg
-#     html.Div(className="pt-5"),
-
-#     # Rubrik för OLYMPISKA SPELEN
-#     html.H1("OLYMPISKA SPELEN", style={"textAlign": "center", "color": "blue"}),
-
-#     # Horisontell linje
-#     html.Hr(),
-
-#     # Lägg till padding-top och bakgrundsfärg
-#     html.Div(className="pt-5"),
-
-#     # Rubrik för nästa sektion
-#     html.H1("TYSKLAND", style={"textAlign": "center", "color": "black"}),
-
-#     # Card för att visa medaljgrafen
-#     dbc.Card(
-#         dbc.CardBody([
-#             html.H4("Tyska Medaljer", className="card-title"),
-#             # Tabs-komponenten som innehåller två flikar
-#             dcc.Tabs([
-#                 dcc.Tab(label="Nationella medaljer", children=[
-#                     medalj_individ()  # Graf för den första fliken
-#                 ], style={'padding': '10px'}),
-                
-#                 dcc.Tab(label="Induviduella medaljer", children=[
-#                     medalj_nation()  # Graf för den andra fliken
-#                 ], style={'padding': '10px'})
-#             ])
-#         ]),
-#         className="border-primary mb-3",  # Bootstrap-klasser för att få en bård runt hela carden
-#         style={"max-width": "30%", "margin": "0 auto"}  # Gör carden centrerad
-#     )
-# ])
 
 app.layout = html.Div([
 
@@ -115,7 +94,7 @@ app.layout = html.Div([
 
     # Flexbox container för vänster och höger card
     dbc.Row([
-        # Card till vänster (30% bredd)
+        # Stort Card till vänster (8/12 bredd)
         dbc.Col(
             dbc.Card(
                 dbc.CardBody([
@@ -125,90 +104,135 @@ app.layout = html.Div([
                         dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px'})
                     ])
                 ]),
-                className="border-primary mb-3", 
-                style={"max-width": "100%", "margin": "0 auto"}
+                className="border-primary mb-3", style={"max-width": "100%", "margin": "0 auto"}
             ),
-            width=4  # 30% bredd på vänster card (i ett system med 12 kolumner)
+            width=5  # 8 delar av en 12-kolumn layout för stort card
         ),
-        
-        # Små cards till höger (70% bredd), vertikalt
+
+        # Liten Col för de tre små cardsen (4/12 bredd)
         dbc.Col(
-            dbc.Row([
-                # Första lilla cardet
-                dbc.Col(
-                    dbc.Card(
-                        dbc.CardBody([
-                            # Flexbox för bild och text
-                            html.Div(
-                                className="d-flex align-items-center",  # Flexbox för att hålla bilden och texten horisontellt
-                                children=[
-                                    html.Img(src='/assets/silver.png', style={'width': '30%', 'margin-right': '10px'}),  # Bild till vänster
-                                    html.Div([
-                                        html.H4("745", className="card-text"),  # Text till höger om bilden
-                                        html.P("Guld medaljer", className="card-text")  # Text som beskriver medaljen
-                                    ])
-                                ]
-                            ),
-                        ]),
-                        className="mb-3",  # Marginal mellan cards
-                        style={"width": "15%", "height": "150px", "margin": "0"}  # Gör alla cards lika höga och bredden är 100%, ingen marginal
-                    ),
-                    width=12,  # Kolumnen är 100% av raden
-                    style={"padding": "0"}  # Ta bort padding från kolumnen
+            # Här placeras de tre små cardsen vertikalt i samma kolumn
+            children=[
+                dbc.Card(
+                    dbc.CardBody([
+                        html.Div(
+                            className="d-flex align-items-center",
+                            children=[
+                                html.Img(src='/assets/guld.png', style={'width': '15%', 'margin-right': '10px'}),  # Bild till vänster
+                                html.Div([
+                                    html.H4("745", className="card-text"),
+                                    html.P("Guld medaljer", className="card-text")
+                                ])
+                            ]
+                        ),
+                    ]),
+                    className="mb-3", style={"height": "150px", "margin": "0"}
                 ),
-                
-                # Andra lilla cardet
-                dbc.Col(
-                    dbc.Card(
-                        dbc.CardBody([
-                            # Flexbox för bild och text
-                            html.Div(
-                                className="d-flex align-items-center",  # Flexbox för att hålla bilden och texten horisontellt
-                                children=[
-                                    html.Img(src='/assets/silver.png', style={'width': '30%', 'margin-right': '10px'}),  # Bild till vänster
-                                    html.Div([
-                                        html.H4("674", className="card-text"),  # Text till höger om bilden
-                                        html.P("Silver medaljer", className="card-text")  # Text som beskriver medaljen
-                                    ])
-                                ]
-                            ),
-                        ]),
-                        className="mb-3",  # Marginal mellan cards
-                        style={"width": "15%", "height": "140px", "margin": "0"}  # Gör alla cards lika höga och bredden är 100%, ingen marginal
-                    ),
-                    width=12,
-                    style={"padding": "0"}  # Ta bort padding från kolumnen
+
+                dbc.Card(
+                    dbc.CardBody([
+                        html.Div(
+                            className="d-flex align-items-center",
+                            children=[
+                                html.Img(src='/assets/silver.png', style={'width': '15%', 'margin-right': '10px'}),  # Bild till vänster
+                                html.Div([
+                                    html.H4("674", className="card-text"),
+                                    html.P("Silver medaljer", className="card-text")
+                                ])
+                            ]
+                        ),
+                    ]),
+                    className="mb-3", style={"height": "150px", "margin": "0"}
                 ),
-                
-                # Tredje lilla cardet
-                dbc.Col(
-                    dbc.Card(
-                        dbc.CardBody([
-                            # Flexbox för bild och text
-                            html.Div(
-                                className="d-flex align-items-center",  # Flexbox för att hålla bilden och texten horisontellt
-                                children=[
-                                    html.Img(src='/assets/bronz.png', style={'width': '35%', 'margin-right': '10px'}),  # Bild till vänster
-                                    html.Div([
-                                        html.H4("746", className="card-text"),  # Text till höger om bilden
-                                        html.P("Bronze medaljer", className="card-text")  # Text som beskriver medaljen
-                                    ])
-                                ]
-                            ),
-                        ]),
-                        className="mb-3",  # Marginal mellan cards
-                        style={"width": "15%", "height": "130px", "margin": "0"}  # Gör alla cards lika höga och bredden är 100%, ingen marginal
-                    ),
-                    width=12,
-                    style={"padding": "0"}  # Ta bort padding från kolumnen
+
+                dbc.Card(
+                    dbc.CardBody([
+                        html.Div(
+                            className="d-flex align-items-center",
+                            children=[
+                                html.Img(src='/assets/bronz.png', style={'width': '18%', 'margin-right': '10px'}),  # Bild till vänster
+                                html.Div([
+                                    html.H4("746", className="card-text"),
+                                    html.P("Brons medaljer", className="card-text")
+                                ])
+                            ]
+                        ),
+                    ]),
+                    className="mb-3", style={"height": "150px", "margin": "0"}
+                )
+            ],
+            width=2  # 4 delar av en 12-kolumn layout för den högerkolumnen med små cards
+        ),
+
+dbc.Col(
+    children=[
+        # Card med tabellen
+        dbc.Card(
+            dbc.CardBody([
+                html.H4("Tysklands OS städer", style={"textAlign": "center"}),
+                dash_table.DataTable(
+                    columns=[
+                        {"name": "Stad", "id": "stad"},
+                        {"name": "Typ av OS", "id": "os_type"},
+                        {"name": "År", "id": "year"}
+                    ],
+                    data=[
+                        {"stad": "Berlin", "os_type": "Sommar OS", "year": "1916 (Inställt)"},
+                        {"stad": "Berlin", "os_type": "Sommar OS", "year": "1936"},
+                        {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"},
+                    ],
+                    style_table={'width': '100%', 'margin': '0 auto'},
+                    style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'},
+                    style_cell={'textAlign': 'center', 'padding': '10px'},
+                )
+            ]),
+            className="mb-3", style={"height": "auto", "width": "100%"}  # Flexibelt kort för tabellen
+        ),
+
+        # Card med dropdown
+        dbc.Card(
+            dbc.CardBody([
+                dcc.Dropdown(options=[
+                            {"label": "Gold", "value": "Gold"},
+                            {"label": "Silver", "value": "Silver"},
+                            {"label": "Bronze", "value": "Bronze"}
+                        ],  value= "Gold", id="dropdown-item"
                 ),
-            ], className="g-0"),  # g-0 eliminerar mellanrum mellan kolumnerna
-            width=8,  # Totalt 70% bredd på höger sektion
-            style={"padding": "0"}  # Ta bort padding från hela kolumnen
+                html.Div(id="dropdown-item-output"),
+                dcc.Graph(id="dd_graph")
+            ]),
+            className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
         )
+    ],
+    width=3  # 3 delar av en 12-kolumn layout för tabellen och dropdown
+)
     ]),
 
+    dbc.Row([
+        dbc.Col([
+            dbc.Card(
+                dbc.CardBody([
+                    dcc.Graph(figure={}, id="line-fig", style={"height": "400px", "width": "100%"})
+                ]),
+                className="mb-3", style={"width": "100%"}
+            )  
+        ])
+    ])
 ])
+
+@callback(
+    Output("dd_graph", "figure"),
+    Input("dropdown-item", "value")
+)
+
+def update_graph(medal):
+    if medal == "Gold":
+        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Gold")
+    elif medal == "Silver":
+        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Silver")
+    elif medal == "Bronze":
+        fig = px.line(ny_team_variabel, x="Years", y=ny_team_variabel["Meal"] == "Bronze")
+    return fig
 
 
 if __name__ == '__main__':
