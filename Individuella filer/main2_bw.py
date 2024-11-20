@@ -39,10 +39,6 @@ def ålders_fördelning_func():
     fig = px.histogram(df_sporter, x="Age", color="Sport", nbins=40, opacity=.4)
     return fig
 
-def langd_och_vikt_func():
-    df_vikt=df_ger[df_ger["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
-    fig = px.scatter(df_vikt, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], animation_frame="Sex", color="Sport", opacity=.4)
-    return fig
 
 
 
@@ -64,8 +60,8 @@ app.layout = html.Div([
             html.Button('Visa åldersfördelning', id='ålders-fördelning-button', n_clicks=0),
             dcc.Graph(id='ålders-fördelning'),],style={"padding": 10, "flex":1, }),
         html.Div([
-            html.Button('Visa längd och vikt', id='langd-vikt-button', n_clicks=0),
-            dcc.Graph(id='langd-vikt-graph'),],style={"padding": 10, "flex":1, })
+            dcc.RadioItems(options=["M", "F"], value="M", id='langdvikt-radio'),
+            dcc.Graph(figure={}, id="langdvikt-graph"),],style={"padding": 10, "flex":1, })
             ], style={"display": "flex", "flexDirection":"row"}),
 
     html.Div([ 
@@ -109,14 +105,16 @@ def ålders_fördelning(n_clicks):
     else:
         return {}
 
+# Scatter med längd och vikt
 @app.callback(
-    Output('controls-and-graph', 'figure'),
-    [Input('controls-and-radio-item', 'value')]
+    Output('langdvikt-graph', 'figure'),
+    [Input('langdvikt-radio', 'value')]
 )
 
-def langd_och_vikt_func():
+def langd_och_vikt_func(gender_choice):
     df_vikt=df_ger[df_ger["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
-    fig = px.scatter(df_vikt, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], animation_frame="Sex", color="Sport", opacity=.4)
+    df_gender=df_vikt[df_vikt["Sex"]==gender_choice]
+    fig = px.scatter(df_gender, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], color="Sport", opacity=.4)
     return fig
 
     
@@ -125,7 +123,7 @@ def langd_och_vikt_func():
     Output('pie-graph', 'figure'),
     [Input('pie-radio', 'value')]
 )
-def update_graph(val):
+def top_tio_graf(val):
     top10_deltag=df_ger["Sport"].value_counts().head(10)
     top10_medalj=df_ger_medals["Sport"].value_counts().head(10)
     ger_deltagare=top10_deltag.to_frame(name="Deltagare")
@@ -159,19 +157,7 @@ def update_graph(barval):
     return fig
 
 
-@app.callback(
-    Output('langd-vikt-graph', 'figure'),
-    [Input('langd-vikt-button', 'n_clicks')]
-)
-
-def langd_och_vikt(n_clicks):
-    if n_clicks > 0:
-        return langd_och_vikt_func()
-    else:
-        return {}
-
     
-
 # Kör appen
 if __name__ == '__main__':
     app.run(debug=True)
