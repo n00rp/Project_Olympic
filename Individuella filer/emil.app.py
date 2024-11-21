@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 #--------------------------------------------------------------------------------------------------------------
-df = pd.read_csv("Project_Olympic/athlete_events.csv")
+df = pd.read_csv("../athlete_events.csv")
 
 """ Tabell på antal medaljer per individ i tyskland """
 ger_df = df[df["NOC"] == "GER"]
@@ -178,20 +178,20 @@ app.layout = html.Div([
     ]),# Raden stängs här
 
     dbc.Row([
-        dbc.Col([
-            dbc.Card(
-                    dbc.CardBody([
-                        dcc.Dropdown(options=[
-                                    {"label": "Man", "value": "Man"},
-                                    {"label": "Kvinna", "value": "Kvinna"},
-                                ],  value= "Man", id="dropdown-gender-output"
-                        ),
-                        dcc.Graph(id="dd_gender_graph")
-                    ]),
-                    className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
-                )  
-        ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
-        ),
+        # dbc.Col([
+        #     dbc.Card(
+        #             dbc.CardBody([
+        #                 dcc.Dropdown(options=[
+        #                             {"label": "Man", "value": "Man"},
+        #                             {"label": "Kvinna", "value": "Kvinna"},
+        #                         ],  value= "Man", id="dropdown-gender-output"
+        #                 ),
+        #                 dcc.Graph(id="dd_gender_graph")
+        #             ]),
+        #             className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
+        #         )  
+        # ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
+        # ),
         dbc.Col([
             dbc.Card(
                     dbc.CardBody([
@@ -234,13 +234,13 @@ def update_graph(medal):
     return fig
 
 
-@callback(
-    Output("dd_gender_graph", "figure"),
-    Input("dropdown-gender-output", "value")
-)
+# @callback(
+#     Output("dd_gender_graph", "figure"),
+#     Input("dropdown-gender-output", "value")
+# )
 
-def update_graph(gender):
-    pass
+# def update_graph(gender):
+#     pass
 
 if __name__ == '__main__':
     app.run(debug=True)

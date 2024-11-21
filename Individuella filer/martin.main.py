@@ -1,185 +1,304 @@
+# Import packages
 import dash
-from dash import Dash, html, dash_table, dcc, Output, Input, callback
-from dash.dependencies import Input, Output
-import plotly.express as px
+import dash_bootstrap_components as dbc
+from dash import Input, Output, dcc, html, ctx
 import pandas as pd
-import matplotlib.pyplot as plt
-import plotly.graph_objs as go
-import seaborn as sns
+import plotly.express as px
 
-import plotly.graph_objs as go
+# Initialise the App
+app = dash.Dash(external_stylesheets=[dbc.themes.BOOTSTRAP])
 
+#################
+# 1 # Bar plot ##
+#################
 
-# Läs in data
-df = pd.read_csv("Project_Olympic/athlete_events.csv")
+# Data
+df_ba = px.data.gapminder()
+df_options = df_ba[df_ba["continent"].isin(["Europe"])]["country"].unique()
+df_ba = df_ba[df_ba["country"].isin(["Spain", "United Kingdom"])]
 
-# Definiera lista med vinter-OS
-wo=["1948 Winter", "1952 Winter", "1956 Winter", "1960 Winter",
-    "1964 Winter", "1968 Winter", "1972 Winter", "1976 Winter",
-    "1980 Winter", "1984 Winter", "1988 Winter", "1992 Winter",
-    "1994 Winter", "1998 Winter", "2002 Winter", "2006 Winter",
-    "2010 Winter", "2014 Winter"]
-
-# Skapa df med endast längdskid-medaljörer
-cc_delt=[]
-for j in wo:
-    df_year=df[df["Games"]==j]
-    df_year_skidor=df_year[df_year["Sport"]=="Cross Country Skiing"]
-    df_year_skidor_medals=df_year_skidor[df_year_skidor["Medal"].isin(["Gold", "Silver", "Bronze"])]
-    medal_land=(len(df_year_skidor_medals["NOC"].unique()))
-    delt_land=(len(df_year_skidor["NOC"].unique()))
-    cc_delt.append([j, delt_land, medal_land])
-df_cc_delt=pd.DataFrame(cc_delt, columns=["Games",  "Deltagarländer", "Medaljländer"])
-
-# Skapa df med Tysklands 10-i-topp-sporter sett till deltagare respektive medaljer
-df_ger=df[df["NOC"]=="GER"]
-df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]
-top10_deltag=df_ger["Sport"].value_counts().head(10)
-top10_medalj=df_ger_medals["Sport"].value_counts().head(10)
-ger_deltagare=top10_deltag.to_frame(name="Deltagare")
-ger_medaljer=top10_medalj.to_frame(name="Medaljer")
-ger_delt_och_med=pd.concat([ger_deltagare, ger_medaljer], axis=1)
-
-# skapa df med tysklands procentuellt bästa sporter (medaljer i förhållande till deltagare)
-deltag=df_ger["Sport"].value_counts()       # antal tyska deltagare per sport
-medalj=df_ger_medals["Sport"].value_counts()    # antal tyska medaljörer per sport
-
-ger_deltagare=deltag.to_frame(name="Deltagare")     
-ger_medaljer=medalj.to_frame(name="Medaljer")
-ger_percent=pd.concat([ger_deltagare, ger_medaljer], axis=1)
-ger_percent["Procent"]=100*ger_percent["Medaljer"]/ger_percent["Deltagare"]
-ger_percent=ger_percent.sort_values("Procent", ascending=False)
-
-ger_percent=ger_percent[(ger_percent["Deltagare"]>=20) & (ger_percent["Medaljer"]>=1)]
-ger_percent1=ger_percent.head(19).rename(columns={"Procent": "Best"})
-ger_percent2=ger_percent.tail(19).rename(columns={"Procent": "Worst"})
-
-bestworst=pd.concat([ger_percent1, ger_percent2])
-colors=["#cc3333"]
-
-
-# Definiera funktion för att generera graf för länders prestation över tid
-def länder_prestation_över_tid_graph():
-    lander_prestation_over_tid = df[(df['NOC'].isin(['GER', 'ITA', 'TUR', 'CHN', 'USA', 'FIN'])) & (df['Season'] == "Summer")].groupby(["NOC", "Year"])["Medal"].count().unstack().fillna(0)
-    fig = go.Figure()
-    for noc in lander_prestation_over_tid.index:
-        noc_data = lander_prestation_over_tid.loc[noc]
-        fig.add_trace(go.Scatter(x=noc_data.index, y=noc_data.values, name=noc))
-    fig.update_layout(title="Länders prestation över tid (Sommar-OS)", xaxis_title="År", yaxis_title="Medaljer")
-    return fig
-
-import seaborn as sns
-
-def ålders_fördelning_func():
-    df_sporter = df[df["Sport"].isin(["Cross Country Skiing", "Football", "Sailing", "Handball"])]
-    fig = sns.histplot(data=df_sporter, x="Age", hue="Sport", multiple="dodge")
-    plotly_fig = go.Figure(data=[go.Histogram(x=df_sporter["Age"], marker_color="blue")])
-    plotly_fig.update_layout(title="Åldersfördelning", xaxis_title="Ålder", yaxis_title="Antal")
-    return plotly_fig
-
-def langd_och_vikt_func():
-    df_ger=df[df["NOC"]=="GER"]
-    df_vikt=df_ger[df_ger["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
-    fig = px.scatter(df_vikt, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], animation_frame="Sex", color="Sport", opacity=.4)
-    return fig
-
-
-
-# Skapa Dash-app
-app = dash.Dash()
-
-# Definiera app-layout
-app.layout = html.Div([
-    html.Div([
-        html.Div([
-            dcc.RadioItems(options=["Deltagarländer", "Medaljländer"], value="Deltagarländer", id='controls-and-radio-item'),
-            dcc.Graph(figure={}, id='controls-and-graph'),],style={"padding": 10, "flex":1, }),
-        html.Div([
-            html.Button('Visa länders prestation över tid', id='lander-prestation-button', n_clicks=0),
-            dcc.Graph(id='lander-prestation-graph'),],style={"padding": 10, "flex":1, })
-            ], style={"display": "flex", "flexDirection":"row"}),
-        
-    html.Div([    
-        html.Div([
-            html.Button('Visa åldersfördelning', id='ålders-fördelning-button', n_clicks=0),
-            dcc.Graph(id='ålders-fördelning'),],style={"padding": 10, "flex":1, }),
-        html.Div([
-            html.Button('Visa längd och vikt', id='langd-vikt-button', n_clicks=0),
-            dcc.Graph(id='langd-vikt-graph'),],style={"padding": 10, "flex":1, })
-            ], style={"display": "flex", "flexDirection":"row"}),
-
-    html.Div([ 
-        html.Div([
-            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio'),
-            dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),  
-        html.Div([
-            dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio'),
-            dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),                 
-            ], style={"display": "flex", "flexDirection":"row"}),
-    
-    ])
-
-
-
-# Definiera callback-funktion för att uppdatera grafen
-@app.callback(
-    Output('controls-and-graph', 'figure'),
-    [Input('controls-and-radio-item', 'value')]
+# Figure
+fig_ba = px.bar(
+    df_ba,
+    x="year",
+    y="lifeExp",
+    color="country",
+    barmode="group",
+    title="Grouped Bar Chart",
+    template="plotly_white",
 )
-def update_graph(col_chosen):
-    fig = px.line(df_cc_delt, x="Games", y=col_chosen)
-    return fig
+fig_ba.update_yaxes(range=[60, 80])
 
-# Pie chart med top 10-sporter
-@app.callback(
-    Output('pie-graph', 'figure'),
-    [Input('pie-radio', 'value')]
-)
-def update_graph(val):
-    fig = px.pie(ger_delt_och_med, values=val, names=ger_delt_och_med.index, title="Tysklands 10 största sporter")
-    return fig
-
-# Bar chart med procentuellt bästa/sämsta sporterna
-@app.callback(
-    Output('bar-graph', 'figure'),
-    [Input('bar-radio', 'value')]
-)
-def update_graph(barval):
-    fig=px.histogram(bestworst, x=bestworst.index, y=barval, color_discrete_sequence=colors, title="Tysklands procentuellt bästa och sämsta grenar")
-    fig.update_layout(yaxis_title="Procent")
-    return fig
-
-
-@app.callback(
-    Output('langd-vikt-graph', 'figure'),
-    [Input('langd-vikt-button', 'n_clicks')]
+# Dropdown
+dropdown_ba = dcc.Dropdown(
+    options=df_options, value=["Spain", "United Kingdom"], multi=True
 )
 
-def langd_och_vikt(n_clicks):
-    if n_clicks > 0:
-        return langd_och_vikt_func()
+# Slider
+slider_ba = dcc.Slider(
+    df_ba["year"].min(),
+    df_ba["year"].max(),
+    5,
+    value=df_ba["year"].min() + 10,
+    marks=None,
+    tooltip={"placement": "bottom", "always_visible": True},
+)
+
+# Radio items
+radio_items_ba = dbc.RadioItems(
+    options=[
+        {"label": "Option A", "value": 0},
+        {"label": "Option B", "value": 1},
+        {"label": "Option C", "value": 2},
+    ],
+    value=0,
+    inline=True,
+)
+
+# Card content
+card_content_ba = [
+    dbc.CardHeader("Card header"),
+    dbc.CardBody(
+        [
+            html.H5("Card title"),
+            html.P(
+                "Here you might want to add some statics or further information for your dashboard",
+            ),
+        ]
+    ),
+]
+
+##################
+# 2 # Line plot ##
+##################
+
+# Data
+df_li = px.data.stocks()
+df_li["date"] = pd.to_datetime(df_li["date"], format="%Y-%m-%d")
+
+# Figure
+fig = px.line(
+    df_li, x="date", y=["AAPL"], template="plotly_white", title="My Plotly Graph"
+)
+
+# Dropdown
+dropdown = dcc.Dropdown(options=["AAPL", "GOOG", "MSFT"], value="AAPL")
+
+# Date Picker
+date_range = dcc.DatePickerRange(
+    start_date_placeholder_text="start date",
+    end_date_placeholder_text="end date",
+    min_date_allowed=df_li.date.min(),
+    max_date_allowed=df_li.date.max(),
+    display_format="DD-MMM-YYYY",
+    first_day_of_week=1,
+)
+
+# Checklist
+checklist = dbc.Checklist(
+    options=[{"label": "Dark theme", "value": 1}],
+    value=[],
+    switch=True,
+)
+
+# Radio items
+radio_items = dbc.RadioItems(
+    options=[
+        {"label": "Red", "value": 0},
+        {"label": "Green", "value": 1},
+        {"label": "Blue", "value": 2},
+    ],
+    value=2,
+    inline=True,
+)
+
+# Card content
+card_content = [
+    dbc.CardBody(
+        [
+            html.H5("My Control Panel"),
+            html.P(
+                "1) Select an option of the dropdown",
+            ),
+            dropdown,
+            html.Br(),
+            html.P(
+                "2) Pick a date range from the form",
+            ),
+            date_range,
+            html.Br(),
+            html.Hr(),
+            html.H6("Optional input"),
+            html.P(
+                "3) Enable dark theme of your graph",
+            ),
+            checklist,
+            html.Br(),
+            html.P(
+                "4) Change the color of the graphs line",
+            ),
+            radio_items,
+        ]
+    ),
+]
+
+#####################
+# 3 # Scatter plot ##
+#####################
+
+# Data
+df_sc = px.data.gapminder()
+df_2007 = df_sc[df_sc.year == 2007]
+
+# Styling
+SIDEBAR_STYLE = {
+    "position": "fixed",
+    "top": 0,
+    "left": 0,
+    "bottom": 0,
+    "width": "16rem",
+    "padding": "2rem 1rem",
+    "background-color": "#f8f9fa",
+}
+CONTENT_STYLE = {
+    "margin-left": "18rem",
+    "margin-right": "2rem",
+    "padding": "2rem 1rem",
+}
+
+# Sidebar
+sidebar = html.Div(
+    [
+        html.H2("Sidebar"),
+        html.Hr(),
+        html.P("A simple sidebar layout with navigation links"),
+        dbc.Button("Bar plot", color="light", n_clicks=0, id="Bar plot"),
+        html.Hr(),
+        dbc.Button("Line plot", color="light", n_clicks=0, id="Line plot"),
+        html.Hr(),
+        dbc.Button("Scatter plot", color="light", n_clicks=0, id="Scatter plot"),
+    ],
+    style=SIDEBAR_STYLE,
+)
+
+# Title
+title = dcc.Markdown("My Dashboard", className="bg-light", style={"font-size": 30})
+
+# Content
+content = html.Div(id="page-content", style=CONTENT_STYLE)
+
+# App Layout
+app.layout = html.Div(
+    [
+        dbc.Row([dbc.Col([title], style={"text-align": "center", "margin": "auto"})]),
+        sidebar,
+        content,
+    ]
+)
+
+# Configure callbacks
+@app.callback(
+    Output("page-content", "children"),
+    Input("Bar plot", "n_clicks"),
+    Input("Line plot", "n_clicks"),
+    Input("Scatter plot", "n_clicks"),
+)
+def update_page(n1, n2, n3):
+    if ctx.triggered_id == "Bar plot":
+        return dbc.Container(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                dbc.Card(
+                                    dcc.Graph(id="figure1", figure=fig_ba),
+                                    color="light",
+                                )
+                            ]
+                        ),
+                    ]
+                ),
+                html.Br(),
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                html.P("Select the countries to display"),
+                                dropdown_ba,
+                            ]
+                        ),
+                        dbc.Col(
+                            [
+                                html.P("Select a year"),
+                                slider_ba,
+                            ]
+                        ),
+                        dbc.Col(
+                            [
+                                html.P("Choose one more option"),
+                                radio_items_ba,
+                            ]
+                        ),
+                    ]
+                ),
+                html.Br(),
+                dbc.Row(
+                    [
+                        dbc.Col([dbc.Card(card_content_ba, color="light")]),
+                        dbc.Col([dbc.Card(card_content_ba, color="light")]),
+                        dbc.Col([dbc.Card(card_content_ba, color="light")]),
+                    ]
+                ),
+            ]
+        )
+    elif ctx.triggered_id == "Line plot":
+        return dbc.Container(
+            [
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            [
+                                dbc.Row(dbc.Card(card_content, color="light")),
+                            ],
+                            width=4,
+                        ),
+                        dbc.Col(
+                            dbc.Card(
+                                dcc.Graph(id="figure1", figure=fig), color="light"
+                            ),
+                            width=8,
+                        ),
+                    ]
+                ),
+            ]
+        )
+    elif ctx.triggered_id == "Scatter plot":
+        return dbc.Container(
+            [
+                html.H3("Analysis on Life Expectation / GDP per Capita in 2007"),
+                dcc.Graph(
+                    figure=px.scatter(
+                        df_2007,
+                        x="gdpPercap",
+                        y="lifeExp",
+                        color="continent",
+                        size="pop",
+                        size_max=60,
+                    )
+                ),
+            ]
+        )
     else:
-        return {}
+        return dbc.Container(
+            [
+                html.H5(
+                    "Please navigate to an analysed data set with the navigation on the left."
+                ),
+            ]
+        )
 
-@app.callback(
-    Output('lander-prestation-graph', 'figure'),
-    [Input('lander-prestation-button', 'n_clicks')]
-)
 
-def update_lander_prestation_graph(n_clicks):
-    if n_clicks > 0:
-        return länder_prestation_över_tid_graph()
-    else:
-        return {}
-@app.callback(
-    Output("ålders-fördelning", "figure"),
-    [Input("ålders-fördelning-button", "n_clicks")]
-)
-def ålders_fördelning(n_clicks):
-    if n_clicks > 0:
-        return ålders_fördelning_func()
-    else:
-        return {}
-# Kör appen
-if __name__ == '__main__':
-    app.run(debug=True)
+# Run the App
+if __name__ == "__main__":
+    app.run_server(debug=False)
