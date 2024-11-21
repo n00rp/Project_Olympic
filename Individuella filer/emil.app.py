@@ -188,13 +188,15 @@ app.layout = html.Div([
     ]),# Raden stängs här
 
      dbc.Container([
-    dbc.Row([
-        dbc.Col([
-            dcc.Tabs(id='tabs', value='tab-2', children=[
-                dcc.Tab(label='Antalet deltagare i respektive land och sport över tid (Sommar OS)', value='tab-2'),
-                dcc.Tab(label='Antalet deltagare i respektive land och sport över tid (Vinter OS)', value='tab-3')
-            ])
-        ], width=2),  # vänster kolumn
+         dbc.Card(
+             dbc.CardBody([
+                 dbc.Row([
+                     dbc.Col([
+                        dcc.Tabs(id='tabs', value='tab-2', children=[
+                        dcc.Tab(label='Sommar OS', value='tab-2'),
+                        dcc.Tab(label='Vinter OS', value='tab-3')
+            ])], width=3),  # vänster kolumn
+
         dbc.Col([
             html.Div(id='tabs-content', children=[
                 html.Div(id='tab-2-content', children=[
@@ -224,6 +226,8 @@ app.layout = html.Div([
             ])
         ], width=10)  # höger kolumn
     ])
+             ])
+         )
      ]),
  
        
@@ -304,6 +308,59 @@ def render_content(tab):
             dcc.Graph(id='figure-medals-3')
         ])
 
+@callback(
+    Output('figure2', 'figure'),
+    Input('country-dropdown-2', 'value'),
+    Input('sport-dropdown', 'value')
+)
+def update_graph(country_selected, sports_selected):
+    df_filtered = df[(df['NOC'].isin(country_selected)) & (df['Sport'].isin(sports_selected))]
+    df_counts = df_filtered.groupby(['Year', 'Sport'])['NOC'].count().reset_index()
+    df_counts.columns = ['Year', 'Sport', 'Antal deltagare']
+    fig = px.line(df_counts, x='Year', y='Antal deltagare', color='Sport')
+    fig.update_yaxes(title='Antal deltagare')
+    return fig
+
+
+@callback(
+    Output('figure-medals', 'figure'),
+    Input('country-dropdown-2', 'value'),
+    Input('sport-dropdown', 'value')
+)
+def update_medals(country_selected, sports_selected):
+    df_filtered = df[(df['NOC'].isin(country_selected)) & (df['Sport'].isin(sports_selected))]
+    df_medals = df_filtered[df_filtered['Medal'].notna()]
+    df_medals = df_medals.groupby(['Sport', 'Medal'])['NOC'].count().reset_index()
+    df_medals.columns = ['Sport', 'Medal', 'Antal medaljer']
+    fig = px.pie(df_medals, values='Antal medaljer', names='Medal')
+    fig.update_layout(title='Antalet medaljer i valda sporterna')
+    return fig
+@callback(
+    Output('figure3', 'figure'),
+    Input('country-dropdown-3', 'value'),
+    Input('sport-dropdown-3', 'value')
+)
+def update_graph(country_selected, sports_selected):
+    df_filtered = df[(df['NOC'].isin(country_selected)) & (df['Sport'].isin(sports_selected)) & (df['Season'] == 'Winter')]
+    df_counts = df_filtered.groupby(['Year', 'Sport'])['NOC'].count().reset_index()
+    df_counts.columns = ['Year', 'Sport', 'Antal deltagare']
+    fig = px.line(df_counts, x='Year', y='Antal deltagare', color='Sport')
+    fig.update_yaxes(title='Antal deltagare')
+    return fig
+
+@callback(
+    Output('figure-medals-3', 'figure'),
+    Input('country-dropdown-3', 'value'),
+    Input('sport-dropdown-3', 'value')
+)
+def update_medals(country_selected, sports_selected):
+    df_filtered = df[(df['NOC'].isin(country_selected)) & (df['Sport'].isin(sports_selected)) & (df['Season'] == 'Winter')]
+    df_medals = df_filtered[df_filtered['Medal'].notna()]
+    df_medals = df_medals.groupby(['Sport', 'Medal'])['NOC'].count().reset_index()
+    df_medals.columns = ['Sport', 'Medal', 'Antal medaljer']
+    fig = px.pie(df_medals, values='Antal medaljer', names='Medal')
+    fig.update_layout(title='Antalet medaljer i valda sporterna')
+    return fig
 
 # @callback(
 #     Output("dd_gender_graph", "figure"),
