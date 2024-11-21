@@ -5,8 +5,18 @@ from dash import Dash, html, dcc, callback, Output, Input, State, html, dash_tab
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
+import hashlib as hl
 #--------------------------------------------------------------------------------------------------------------
 df = pd.read_csv("../athlete_events.csv")
+
+""" hashar namnen och droppar namn kolumnen """
+hashes = df["Name"].apply(lambda client_num: hl.sha256(client_num.encode()).hexdigest())
+df.insert(1, "SHA Hash Values", hashes)
+drop = df.drop(columns= ["Name"])
+df = drop
+
+""" Tar alla unika sporter """
+sports = df['Sport'].unique()
 
 """ Tabell på antal medaljer per individ i tyskland """
 ger_df = df[df["NOC"] == "GER"]
@@ -177,37 +187,63 @@ app.layout = html.Div([
 
     ]),# Raden stängs här
 
+     dbc.Container([
     dbc.Row([
+        dbc.Col([
+            dcc.Tabs(id='tabs', value='tab-2', children=[
+                dcc.Tab(label='Antalet deltagare i respektive land och sport över tid (Sommar OS)', value='tab-2'),
+                dcc.Tab(label='Antalet deltagare i respektive land och sport över tid (Vinter OS)', value='tab-3')
+            ])
+        ], width=2),  # vänster kolumn
+        dbc.Col([
+            html.Div(id='tabs-content', children=[
+                html.Div(id='tab-2-content', children=[
+                    dcc.Dropdown(id='country-dropdown-2',
+                                 options=[x for x in df['NOC'].unique()],
+                                 multi=True,
+                                 value=['USA', 'SWE']),
+                    dcc.Dropdown(id='sport-dropdown',
+                                 options=[{'label': sport, 'value': sport} for sport in sports],
+                                 multi=True,
+                                 value=['Athletics', 'Swimming']),
+                    dcc.Graph(id='figure2'),
+                    dcc.Graph(id='figure-medals')
+                ]),
+                html.Div(id='tab-3-content', children=[
+                    dcc.Dropdown(id='country-dropdown-3',
+                                 options=[x for x in df['NOC'].unique()],
+                                 multi=True,
+                                 value=['USA', 'SWE']),
+                    dcc.Dropdown(id='sport-dropdown-3',
+                                 options=[{'label': sport, 'value': sport} for sport in sports],
+                                 multi=True,
+                                 value=['Alpine Skiing', 'Figure Skating']),
+                    dcc.Graph(id='figure3'),
+                    dcc.Graph(id='figure-medals-3')
+                ])
+            ])
+        ], width=10)  # höger kolumn
+    ])
+     ]),
+ 
+       
+       # Skriv här
         # dbc.Col([
         #     dbc.Card(
         #             dbc.CardBody([
         #                 dcc.Dropdown(options=[
-        #                             {"label": "Man", "value": "Man"},
-        #                             {"label": "Kvinna", "value": "Kvinna"},
-        #                         ],  value= "Man", id="dropdown-gender-output"
+        #                             {"label": "Sommar", "value": "Sommar"},
+        #                             {"label": "Vinter", "value": "Vinter"},
+        #                         ],  value= "Man", id="dropdown-gender"
         #                 ),
-        #                 dcc.Graph(id="dd_gender_graph")
+        #                 html.Div(id="dropdown-season_emil"),
+        #                 dcc.Graph(id="emil_top_sports")
         #             ]),
         #             className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
-        #         )  
+        #         )
         # ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
-        # ),
-        dbc.Col([
-            dbc.Card(
-                    dbc.CardBody([
-                        dcc.Dropdown(options=[
-                                    {"label": "Sommar", "value": "Sommar"},
-                                    {"label": "Vinter", "value": "Vinter"},
-                                ],  value= "Man", id="dropdown-gender"
-                        ),
-                        html.Div(id="dropdown-season_emil"),
-                        dcc.Graph(id="emil_top_sports")
-                    ]),
-                    className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
-                )
-        ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
-        )
-    ]), # Raden stängs här
+        # )
+  # Raden stängs här
 
         dbc.Row([
         dbc.Col([
@@ -216,6 +252,7 @@ app.layout = html.Div([
             html.Hr(),
         ])
     ],className="mb-3")
+    
 ]) # App.layout stängs här
 
 
@@ -233,6 +270,40 @@ def update_graph(medal):
         fig = px.line(df_pivot_b, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
     return fig
 
+@callback(
+    Output('tabs-content', 'children'),
+    Input('tabs', 'value')
+)
+def render_content(tab):
+    if tab == 'tab-1':
+        return tab_1_layout
+    elif tab == 'tab-2':
+        return html.Div(id='tab-2-content', children=[
+            dcc.Dropdown(id='country-dropdown-2',
+                         options=[x for x in df['NOC'].unique()],
+                         multi=True,
+                         value=['USA', 'SWE']),
+            dcc.Dropdown(id='sport-dropdown',
+                         options=[{'label': sport, 'value': sport} for sport in sports],
+                         multi=True,
+                         value=['Athletics', 'Swimming']),
+            dcc.Graph(id='figure2'),
+            dcc.Graph(id='figure-medals')
+        ])
+    elif tab == 'tab-3':
+        return html.Div(id='tab-3-content', children=[
+            dcc.Dropdown(id='country-dropdown-3',
+                         options=[x for x in df['NOC'].unique()],
+                         multi=True,
+                         value=['USA', 'SWE']),
+            dcc.Dropdown(id='sport-dropdown-3',
+                         options=[{'label': sport, 'value': sport} for sport in sports],
+                         multi=True,
+                         value=['Alpine Skiing', 'Figure Skating']),
+            dcc.Graph(id='figure3'),
+            dcc.Graph(id='figure-medals-3')
+        ])
+
 
 # @callback(
 #     Output("dd_gender_graph", "figure"),
@@ -244,3 +315,19 @@ def update_graph(medal):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+     # dbc.Col([
+        #     dbc.Card(
+        #             dbc.CardBody([
+        #                 dcc.Dropdown(options=[
+        #                             {"label": "Man", "value": "Man"},
+        #                             {"label": "Kvinna", "value": "Kvinna"},
+        #                         ],  value= "Man", id="dropdown-gender-output"
+        #                 ),
+        #                 dcc.Graph(id="dd_gender_graph")
+        #             ]),
+        #             className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
+        #         )  
+        # ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
+        # ),
