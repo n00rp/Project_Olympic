@@ -280,6 +280,20 @@ app.layout = html.Div([
     ])
 
 
+@callback(
+    Output("dd_graph", "figure"),
+    Input("dropdown-item", "value")
+)
+
+def update_graph(medal):
+    if medal == "Gold":
+        fig = px.line(df_pivot_g, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
+    elif medal == "Silver":
+        fig = px.line(df_pivot_s, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
+    elif medal == "Bronze":
+        fig = px.line(df_pivot_b, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
+    return fig
+
 
 # Deltagarländer och medaljländer i längdskidåkning
 @app.callback(
