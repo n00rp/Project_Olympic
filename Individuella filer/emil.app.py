@@ -239,8 +239,20 @@ def update_graph(medal):
     Input("dropdown-gender-output", "value")
 )
 
+@callback(
+    Output("dd_gender_graph", "figure"),
+    Input("dropdown-gender-output", "value")
+)
 def update_graph(gender):
-    pass
+    if gender == "Man":
+        # Filtrera data för män
+        filtered_df = df[df["Sex"] == "M"]
+        fig = px.bar(filtered_df, x="Sport", y="Medal", title="Medaljer per sport för män")
+    elif gender == "Kvinna":
+        # Filtrera data för kvinnor
+        filtered_df = df[df["Sex"] == "F"]
+        fig = px.bar(filtered_df, x="Sport", y="Medal", title="Medaljer per sport för kvinnor")
+    return fig
 
 if __name__ == '__main__':
     app.run(debug=True)
