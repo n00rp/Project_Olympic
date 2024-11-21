@@ -108,7 +108,6 @@ app.layout = html.Div([
 
     # Flexbox container för vänster och höger card
     dbc.Row([
-        # Stort Card till vänster (8/12 bredd)
         dbc.Col(
             dbc.Card(
                 dbc.CardBody([
@@ -120,7 +119,7 @@ app.layout = html.Div([
                 ]),
                 className="mb-3", style={"max-width": "100%", "margin": "0 auto"}
             ),
-            width=4  # 8 delar av en 12-kolumn layout för stort card
+            width=4  # 4 delar av en 12-kolumn layout för stort card
         ),
 
 
@@ -174,7 +173,7 @@ app.layout = html.Div([
                     className="mb-3", style={"height": "150px", "margin": "0"}
                 )
             ],
-            width=2  # 4 delar av en 12-kolumn layout för den högerkolumnen med små cards
+            width=2  # 2 delar av en 12-kolumn layout för den högerkolumnen med små cards
         ),# Kolumnen stängs här
 
         dbc.Col(
@@ -215,7 +214,6 @@ app.layout = html.Div([
         ]
         )
         #skriv en ny kolumn här
-
 
     ]),# Raden stängs här
     
@@ -349,29 +347,6 @@ app.layout = html.Div([
             ])
         ])
 
-
- 
-       
-       # Skriv här
-        # dbc.Col([
-        #     dbc.Card(
-        #             dbc.CardBody([
-        #                 dcc.Dropdown(options=[
-        #                             {"label": "Sommar", "value": "Sommar"},
-        #                             {"label": "Vinter", "value": "Vinter"},
-        #                         ],  value= "Man", id="dropdown-gender"
-        #                 ),
-        #                 html.Div(id="dropdown-season_emil"),
-        #                 dcc.Graph(id="emil_top_sports")
-        #             ]),
-        #             className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
-        #         )
-        # ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
-        # )
-  # Raden stängs här
-
-
-    
 ]) # App.layout stängs här
 
 
