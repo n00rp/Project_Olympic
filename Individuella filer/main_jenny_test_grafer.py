@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import random
 
 # Läs in din data
-df = pd.read_csv("Project_Olympic/athlete_events.csv")
+df = pd.read_csv("../athlete_events.csv")
 
 # Skapa en lista med unika sporter
 sporter = df["Sport"].unique()
