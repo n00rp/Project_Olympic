@@ -5,7 +5,7 @@ import plotly.express as px
 import dash_bootstrap_components as dbc
 
 # Läs in data från csv-filen
-df = pd.read_csv("Project_Olympic/athlete_events.csv")
+df = pd.read_csv("../athlete_events.csv")
 
 # Filtrera data för att bara inkludera Sommar OS
 df_summer = df[df['Season'] == 'Summer']
