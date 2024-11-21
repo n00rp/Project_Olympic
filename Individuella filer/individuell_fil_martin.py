@@ -9,7 +9,7 @@ from dash import html
 from dash import dcc
 
 # Läs in data från csv-filen
-df = pd.read_csv("Project_Olympic/athlete_events.csv")
+df = pd.read_csv("../athlete_events.csv")
 
 # Skapa en lista med unika sporter
 sports = df['Sport'].unique()
