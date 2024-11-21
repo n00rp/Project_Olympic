@@ -448,9 +448,7 @@ def age_histogram(sport_selected):
     Input('tabs', 'value')
 )
 def render_content(tab):
-    if tab == 'tab-1':
-        return tab_1_layout
-    elif tab == 'tab-2':
+    if tab == 'tab-2':
         return html.Div(id='tab-2-content', children=[
             dcc.Dropdown(id='country-dropdown-2',
                          options=[x for x in df['NOC'].unique()],
@@ -485,18 +483,7 @@ def render_content(tab):
             dcc.Graph(id='figure14')
         ])
 
-# @app.callback(
-#     Output('figure1', 'figure'),
-#     Input('country-dropdown-2', 'value')
-# )
-# def update_graph(countries_selected):
-#     df_filtered = df[df['NOC'].isin(countries_selected)]
-#     df_filtered = df_filtered[df_filtered['Season'] == 'Summer']
-#     df_counts = df_filtered.groupby(['Year', 'NOC'])['ID'].count().reset_index()
-#     df_counts.columns = ['Year', 'Land', 'Antal deltagare']
-#     fig = px.line(df_counts, x='Year', y='Antal deltagare', color='Land')
-#     fig.update_yaxes(title='Antal deltagare')
-#     return fig
+
 
 @app.callback(
     Output('figure12', 'figure'),
