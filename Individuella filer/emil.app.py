@@ -6,7 +6,7 @@ from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 #--------------------------------------------------------------------------------------------------------------
-df = pd.read_csv("athlete_events.csv")
+df = pd.read_csv("Project_Olympic/athlete_events.csv")
 
 """ Tabell på antal medaljer per individ i tyskland """
 ger_df = df[df["NOC"] == "GER"]
