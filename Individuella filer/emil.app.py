@@ -41,6 +41,15 @@ df_pivot_g = df_pivot["Gold"]
 df_pivot_s = df_pivot["Silver"]
 df_pivot_b = df_pivot["Bronze"]
 
+""" Filtrering av medaljer inom skidor """
+# Länder som tagit medalj i längdskidor
+df_skidor=df[df["Sport"]=="Cross Country Skiing"]
+df_skidor_medaljer=df_skidor[df_skidor["Medal"].isin(["Gold", "Silver", "Bronze"])]
+df_skidor_medaljer["NOC"].value_counts()
+
+fig3=px.bar(df_skidor_medaljer["NOC"].value_counts(), labels={"NOC": "Land", "value": "Antal medaljer"}, title=("Länder som tagit medalj i längdskidor"))
+fig3.update_layout(showlegend=False)
+
 #----------------------------------------------------------------------------------------------------------------
 
 def medalj_individ():
@@ -257,7 +266,29 @@ app.layout = html.Div([
 
      dbc.Row([
          dbc.Col([
-             
+             dbc.Card(
+                 dbc.CardBody([
+                     dcc.Graph(figure=fig3)
+                 ],style={"padding": 1, "flex":1, })
+             )
+         ]),
+         dbc.Col([
+             dbc.Card(
+                 dbc.CardBody([
+                     dcc.RadioItems(options=[
+                            {"label": "Man", "value": "M"},
+                            {"label": "Kvinna", "value": "F"}], value="M", id='langdvikt-radio'),
+                     dcc.Graph(figure={}, id="langdvikt-graph")
+                 ],style={"padding": 1, "flex":1, })
+             )
+         ]),
+         dbc.Col([
+             dbc.Card(
+                 dbc.CardBody([
+                    dcc.RadioItems(options=["Winter games", "Summer games"], value="Winter games", id='coldwar-radio'),
+                    dcc.Graph(figure={}, id="coldwar-graph")
+                 ],style={"padding": 1, "flex":1, })
+             )
          ])
      ])
  
@@ -422,6 +453,42 @@ def update_graph(barval):
     colors=["#cc3333"]
     fig=px.histogram(bestworst, x=bestworst.index, y=barval, color_discrete_sequence=colors, title="Tysklands procentuellt bästa och sämsta grenar")
     fig.update_layout(yaxis_title="Procent")
+    return fig
+
+@callback(
+    Output('langdvikt-graph', 'figure'),
+    [Input('langdvikt-radio', 'value')]
+)
+
+def langd_och_vikt_func(gender_choice):
+    df_vikt=df_ger[df_ger["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
+    df_gender=df_vikt[df_vikt["Sex"]==gender_choice]
+    fig = px.scatter(df_gender, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], color="Sport", opacity=.4)
+    return fig
+
+@app.callback(
+    Output('coldwar-graph', 'figure'),
+    [Input('coldwar-radio', 'value')]
+)
+
+def coldwar_func(sw_choice):
+    df_frg_gdr=df[df["NOC"].isin(["FRG", "GDR"])]
+    games_cold_war_s=["1968 Summer", "1972 Summer", "1976 Summer", "1980 Summer", "1984 Summer", "1988 Summer"]
+    games_cold_war_w=["1968 Winter", "1972 Winter", "1976 Winter", "1980 Winter", "1984 Winter", "1988 Winter"]
+    df_frg_gdr=df_frg_gdr[df_frg_gdr["Year"].isin([1968, 1972, 1976, 1980, 1984, 1988])]
+    df_frg_gdr=df_frg_gdr[df_frg_gdr["Medal"].isin(["Gold", "Silver", "Bronze"])]
+    df_frg_gdr["Medaltot"]=1
+    df_frg_gdr["Winter games"]=None
+    df_frg_gdr["Summer games"]=None
+    mask1=df_frg_gdr["Games"].isin(games_cold_war_w)
+    mask2=df_frg_gdr["Games"].isin(games_cold_war_s)
+    df_frg_gdr.loc[mask1, "Winter games"]=df_frg_gdr.loc[mask1, "Games"]
+    df_frg_gdr.loc[mask2, "Summer games"]=df_frg_gdr.loc[mask2, "Games"]
+    df_frg_gdr=df_frg_gdr.sort_values(by=["Year"])
+
+    fig=px.histogram(df_frg_gdr, x=sw_choice, y="Medaltot", color="NOC", barmode="group")
+    fig.update_xaxes(categoryorder="array", categoryarray=games_cold_war_s)
+    fig.update_yaxes(title="Antal medaljer")
     return fig
 
 # @callback(
