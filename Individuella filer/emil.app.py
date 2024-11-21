@@ -6,6 +6,7 @@ from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import hashlib as hl
+import random
 #--------------------------------------------------------------------------------------------------------------
 df = pd.read_csv("../athlete_events.csv")
 
@@ -49,6 +50,14 @@ df_skidor_medaljer["NOC"].value_counts()
 
 fig3=px.bar(df_skidor_medaljer["NOC"].value_counts(), labels={"NOC": "Land", "value": "Antal medaljer"}, title=("Länder som tagit medalj i längdskidor"))
 fig3.update_layout(showlegend=False)
+
+# Definiera lista med vinter-OS
+wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
+    "1948 Winter", "1952 Winter", "1956 Winter", "1960 Winter",
+    "1964 Winter", "1968 Winter", "1972 Winter", "1976 Winter",
+    "1980 Winter", "1984 Winter", "1988 Winter", "1992 Winter",
+    "1994 Winter", "1998 Winter", "2002 Winter", "2006 Winter",
+    "2010 Winter", "2014 Winter"]
 
 #----------------------------------------------------------------------------------------------------------------
 
@@ -260,7 +269,7 @@ app.layout = html.Div([
             ])
         ], width=12)  # höger kolumn
     ])
-             ])
+             ]),className="mb-3"
          )
      ], fluid=True),
 
@@ -290,7 +299,47 @@ app.layout = html.Div([
                  ],style={"padding": 1, "flex":1, })
              )
          ])
-     ])
+     ]),
+
+     dbc.Row([
+         dbc.Col([
+             dbc.Card(
+                 dbc.CardBody([
+                     dcc.RadioItems(options=["Deltagarländer", "Medaljländer"], value="Deltagarländer", id='controls-and-radio-item'),
+                     dcc.Graph(figure={}, id='controls-and-graph')
+                 ],style={"padding": 10, "flex":1, })
+             )
+         ],width=5),
+         dbc.Col([
+             dbc.Card(
+                 dbc.CardBody([
+                     dcc.Markdown("Åldersfördelning i respektive sport"),
+                     dcc.Dropdown(id='sport',
+                         options=[x for x in ["Sailing", "Curling", "Football", "Handball"]],
+                         multi=True,
+                         value=['Curling', 'Handball']),
+                         dcc.Graph(id='figure1')   
+                 ])
+             )
+         ])
+     ]),
+
+        dbc.Row([
+            dbc.Col([
+                dbc.Card(
+                    dbc.CardBody([
+                            html.H1("Åldersfördelning i OS"),
+                            dcc.Dropdown(
+                                id="sport-dropdown1",
+                                options=[{"label": sport, "value": sport} for sport in sports],
+                                value=sports[0]),
+                            dcc.Graph(id="age-graph")
+                    ])
+                )
+            ])
+        ])
+
+
  
        
        # Skriv här
@@ -489,6 +538,56 @@ def coldwar_func(sw_choice):
     fig=px.histogram(df_frg_gdr, x=sw_choice, y="Medaltot", color="NOC", barmode="group")
     fig.update_xaxes(categoryorder="array", categoryarray=games_cold_war_s)
     fig.update_yaxes(title="Antal medaljer")
+    return fig
+
+# Deltagarländer och medaljländer i längdskidåkning
+@app.callback(
+    Output('controls-and-graph', 'figure'),
+    [Input('controls-and-radio-item', 'value')]
+)
+def cross_country_countries(cc_yval):
+    cc_delt=[]
+    for j in wo:
+        df_year=df[df["Games"]==j]
+        df_year_skidor=df_year[df_year["Sport"]=="Cross Country Skiing"]
+        df_year_skidor_medals=df_year_skidor[df_year_skidor["Medal"].isin(["Gold", "Silver", "Bronze"])]
+        medal_land=(len(df_year_skidor_medals["NOC"].unique()))
+        delt_land=(len(df_year_skidor["NOC"].unique()))
+        cc_delt.append([j, delt_land, medal_land])
+    cross_country_lander=pd.DataFrame(cc_delt, columns=["Games",  "Deltagarländer", "Medaljländer"])
+    fig = px.line(cross_country_lander, x="Games", y=cc_yval)
+    fig.update_xaxes(title_font_size=7)
+    return fig   
+
+@app.callback(
+    Output('figure1','figure'),
+    Input('sport', 'value')
+)
+def age_histogram(sport_selected):
+    df_filtered = df[df.Sport.isin(sport_selected)]
+    fig = px.histogram(df_filtered, x='Age', color='Sport', opacity=.4, range_x=[10,70], range_y=[0,1000], barmode="overlay")
+
+    return fig
+
+# Definiera en funktion som uppdaterar grafen när användaren väljer en ny sport
+@app.callback(
+    Output("age-graph", "figure"),
+    [Input("sport-dropdown1", "value")]
+)
+def update_graph(sport):
+    # Filtrera data för den valda sporten
+    df_sport = df[df["Sport"] == sport]
+    df_sport = df_sport.dropna()
+
+    # Skapar en hexadecimal färgkod och slumpar olika färger i grafen.
+    colors = ["#" + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(len(df_sport))]
+
+    # Räknar antalet deltagare vid varje ålder.
+    age_counts = df_sport[df_sport["Age"].notnull()]["Age"].value_counts().sort_index()
+    # Skapa ett linjediagram för åldersfördelningen
+    fig = px.line(x=age_counts.index, y=age_counts.values, title="Åldersfördelning i " + sport, labels={"x": "Ålder", "y": "Antal deltagare"}, color_discrete_sequence=colors)
+
+    # Returnera grafen
     return fig
 
 # @callback(
