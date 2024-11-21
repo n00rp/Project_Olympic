@@ -1,7 +1,6 @@
 import plotly.express as px
 import matplotlib.pyplot as plt
 import pandas as pd
-
 from dash import Dash, html, dcc, callback, Output, Input, State, html, dash_table
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
@@ -218,15 +217,6 @@ app.layout = html.Div([
         ])
     ],className="mb-3")
 ]) # App.layout stängs här
-
-
-
-
-
-
-
-
-
 
 
 @callback(
