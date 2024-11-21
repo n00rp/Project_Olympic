@@ -9,6 +9,7 @@ import hashlib as hl
 #--------------------------------------------------------------------------------------------------------------
 df = pd.read_csv("../athlete_events.csv")
 
+
 """ hashar namnen och droppar namn kolumnen """
 hashes = df["Name"].apply(lambda client_num: hl.sha256(client_num.encode()).hexdigest())
 df.insert(1, "SHA Hash Values", hashes)
@@ -52,6 +53,7 @@ fig3.update_layout(showlegend=False)
 
 #----------------------------------------------------------------------------------------------------------------
 
+
 def medalj_individ():
     fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=550, height=650)
     fig.update_layout(title="Tyska Individuella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
@@ -67,7 +69,15 @@ def medalj_nation():
 app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = html.Div([
-
+    dcc.Store(id='theme-store', data='light'),  # Lagrar det aktuella tema-värdet
+    dcc.Dropdown(
+        id='theme-dropdown',
+        options=[
+            {'label': 'Ljus', 'value': 'light'},
+            {'label': 'Mörk', 'value': 'dark'}
+        ],
+        value='light'  # Standardvärde
+    ),
     dbc.Card(
         dbc.CardBody([
             html.H2("Välkommen till Olympiska Spelen!", className="card-title"),
@@ -199,7 +209,7 @@ app.layout = html.Div([
 
 
     ]),# Raden stängs här
-
+    
     dbc.Card(
         dbc.CardBody([
         html.Div([ 
@@ -490,7 +500,22 @@ def coldwar_func(sw_choice):
     fig.update_xaxes(categoryorder="array", categoryarray=games_cold_war_s)
     fig.update_yaxes(title="Antal medaljer")
     return fig
+@app.callback(
+    Output('theme-store', 'data'),
+    [Input('theme-dropdown', 'value')]
+)
+def update_theme(value):
+    return value
 
+@app.callback(
+    Output('app-container', 'className'),  # Uppdaterar tema-färgerna i appen
+    [Input('theme-store', 'data')]
+)
+def update_app_theme(theme):
+    if theme == 'dark':
+        return 'dark-theme'
+    else:
+        return 'light-theme'
 # @callback(
 #     Output("dd_gender_graph", "figure"),
 #     Input("dropdown-gender-output", "value")
