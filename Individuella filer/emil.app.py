@@ -24,6 +24,10 @@ medal = ger_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 medals = ger_df[medal]
 color1 = ["silver", "orange", "gold"]
 
+"""" Björns filtrering av medaljer """
+df_ger=df[df["NOC"]=="GER"]                                                 # Alla tyska deltagare
+df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]  
+
 """ Tabell på medaljer som nation i Tyskland """
 temp_df = ger_df.drop_duplicates(subset=["Team","NOC","Games","Year","City","Sport","Event","Medal"])
 ny_team_variabel = temp_df["Medal"].isin(["Gold", "Silver", "Bronze"])
@@ -187,6 +191,27 @@ app.layout = html.Div([
 
     ]),# Raden stängs här
 
+    dbc.Card(
+        dbc.CardBody([
+        html.Div([ 
+        html.Div([
+            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio'),
+            dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),  
+        html.Div([
+            dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio'),
+            dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),                 
+            ], style={"display": "flex", "flexDirection":"row"}),
+
+    dbc.Row([
+        dbc.Col([
+            html.Hr(),
+            html.H1("ALLA NATIONER", style={"textAlign": "center", "color": "black"}),
+            html.Hr(),
+        ])
+    ],className="mb-3"),
+        ])
+    ),
+
      dbc.Container([
          dbc.Card(
              dbc.CardBody([
@@ -224,11 +249,17 @@ app.layout = html.Div([
                     dcc.Graph(id='figure-medals-3')
                 ])
             ])
-        ], width=10)  # höger kolumn
+        ], width=12)  # höger kolumn
     ])
              ])
          )
-     ]),
+     ], fluid=True),
+
+     dbc.Row([
+         dbc.Col([
+             
+         ])
+     ])
  
        
        # Skriv här
@@ -249,13 +280,7 @@ app.layout = html.Div([
         # )
   # Raden stängs här
 
-        dbc.Row([
-        dbc.Col([
-            html.Hr(),
-            html.H1("ALLA NATIONER", style={"textAlign": "center", "color": "black"}),
-            html.Hr(),
-        ])
-    ],className="mb-3")
+
     
 ]) # App.layout stängs här
 
@@ -360,6 +385,43 @@ def update_medals(country_selected, sports_selected):
     df_medals.columns = ['Sport', 'Medal', 'Antal medaljer']
     fig = px.pie(df_medals, values='Antal medaljer', names='Medal')
     fig.update_layout(title='Antalet medaljer i valda sporterna')
+    return fig
+
+@app.callback(
+    Output('pie-graph', 'figure'),
+    [Input('pie-radio', 'value')]
+)
+def top_tio_graf(val):
+    top10_deltag=df_ger["Sport"].value_counts().head(10)
+    top10_medalj=df_ger_medals["Sport"].value_counts().head(10)
+    ger_deltagare=top10_deltag.to_frame(name="Deltagare")
+    ger_medaljer=top10_medalj.to_frame(name="Medaljer")
+    ger_delt_och_med=pd.concat([ger_deltagare, ger_medaljer], axis=1)
+    fig = px.pie(ger_delt_och_med, values=val, names=ger_delt_och_med.index, title="Tysklands 10 största sporter")
+    return fig
+
+# Bar chart med procentuellt bästa/sämsta sporterna
+@app.callback(
+    Output('bar-graph', 'figure'),
+    [Input('bar-radio', 'value')]
+)
+def update_graph(barval):
+    deltag=df_ger["Sport"].value_counts()       # antal tyska deltagare per sport
+    medalj=df_ger_medals["Sport"].value_counts()    # antal tyska medaljörer per sport
+    ger_deltagare=deltag.to_frame(name="Deltagare")     
+    ger_medaljer=medalj.to_frame(name="Medaljer")
+    ger_percent=pd.concat([ger_deltagare, ger_medaljer], axis=1)
+    ger_percent=ger_percent[(ger_percent["Deltagare"]>=20) & (ger_percent["Medaljer"]>=1)]  # Rensa bort sporter som är för små
+    ger_percent["Procent"]=100*ger_percent["Medaljer"]/ger_percent["Deltagare"]
+    ger_percent=ger_percent.sort_values("Procent", ascending=False)
+
+    ger_percent1=ger_percent.head(18).rename(columns={"Procent": "Best"})
+    ger_percent2=ger_percent.tail(18).rename(columns={"Procent": "Worst"})
+
+    bestworst=pd.concat([ger_percent1, ger_percent2])
+    colors=["#cc3333"]
+    fig=px.histogram(bestworst, x=bestworst.index, y=barval, color_discrete_sequence=colors, title="Tysklands procentuellt bästa och sämsta grenar")
+    fig.update_layout(yaxis_title="Procent")
     return fig
 
 # @callback(
