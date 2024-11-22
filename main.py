@@ -379,9 +379,8 @@ def update_graph(medal):
     Input('tabs', 'value')
 )
 def render_content(tab):
-    if tab == 'tab-1':
-        return tab_1_layout
-    elif tab == 'tab-2':
+
+    if tab == 'tab-2':
         return html.Div(id='tab-2-content', children=[
             dcc.Dropdown(id='country-dropdown-2',
                          options=[x for x in df['NOC'].unique()],
