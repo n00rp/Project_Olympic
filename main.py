@@ -51,7 +51,7 @@ df_skidor=df[df["Sport"]=="Cross Country Skiing"]
 df_skidor_medaljer=df_skidor[df_skidor["Medal"].isin(["Gold", "Silver", "Bronze"])]
 df_skidor_medaljer["NOC"].value_counts()
 
-fig3=px.bar(df_skidor_medaljer["NOC"].value_counts(), labels={"NOC": "Land", "value": "Antal medaljer"}, title=("Länder som tagit medalj i längdskidor"))
+fig3=px.bar(df_skidor_medaljer["NOC"].value_counts(), labels={"NOC": "Land", "value": "Antal medaljer"})
 fig3.update_layout(showlegend=False)
 
 # Definiera lista med vinter-OS
@@ -294,26 +294,29 @@ app.layout = html.Div([
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
+                     dcc.Markdown("Sammanlagda medaljställningen i längdskidor"),
                      dcc.Graph(figure=fig3)
-                 ],style={"padding": 1, "flex":1, })
+                 ],style={"padding": 5, "flex":1, })
              )
          ],width=4), 
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
+                     dcc.Markdown("Längd och vikt i några utvalda sporter"),
                      dcc.RadioItems(options=[
                             {"label": "Man", "value": "M"},
                             {"label": "Kvinna", "value": "F"}], value="M", id='langdvikt-radio', style={"fontSize": "20px"}), # Ökat storleken på radioitem text
                      dcc.Graph(figure={}, id="langdvikt-graph")
-                 ],style={"padding": 1, "flex":1, })
+                 ],style={"padding": 5, "flex":1, })
              )
          ],width=4),
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
+                    dcc.Markdown("Västtyskland och Östtyskland under Kalla kriget"),
                     dcc.RadioItems(options=["Winter games", "Summer games"], value="Winter games", id='coldwar-radio', style={"fontSize": "20px"}),
                     dcc.Graph(figure={}, id="coldwar-graph")
-                 ],style={"padding": 1, "flex":1, })
+                 ],style={"padding": 5, "flex":1, })
              )
          ],width=4)
      ], className="mb-4"),
@@ -322,9 +325,10 @@ app.layout = html.Div([
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
+                     dcc.Markdown("Utvecklingen av länder i längdskidåkning"),
                      dcc.RadioItems(options=["Deltagarländer", "Medaljländer"], value="Deltagarländer", id='controls-and-radio-item', style={"fontSize": "20px"}),
                      dcc.Graph(figure={}, id='controls-and-graph')
-                 ],style={"padding": 10, "flex":1, })
+                 ],style={"padding": 5, "flex":1, })
              )
          ],width=5),
          dbc.Col([
@@ -345,7 +349,7 @@ app.layout = html.Div([
             dbc.Col([
                 dbc.Card(
                     dbc.CardBody([
-                            html.H1("Åldersfördelning i OS"),
+                            html.H5("Åldersfördelning i OS"),
                             dcc.Dropdown(
                                 id="sport-dropdown1",
                                 options=[{"label": sport, "value": sport} for sport in sports],
@@ -550,7 +554,6 @@ def cross_country_countries(cc_yval):
         cc_delt.append([j, delt_land, medal_land])
     cross_country_lander=pd.DataFrame(cc_delt, columns=["Games",  "Deltagarländer", "Medaljländer"])
     fig = px.line(cross_country_lander, x="Games", y=cc_yval)
-    fig.update_xaxes(title_font_size=7)
     return fig   
 
 @app.callback(
