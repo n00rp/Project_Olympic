@@ -297,7 +297,7 @@ app.layout = html.Div([
                      dcc.Graph(figure=fig3)
                  ],style={"padding": 1, "flex":1, })
              )
-         ]),
+         ],width=4), 
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
@@ -307,7 +307,7 @@ app.layout = html.Div([
                      dcc.Graph(figure={}, id="langdvikt-graph")
                  ],style={"padding": 1, "flex":1, })
              )
-         ]),
+         ],width=4),
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
@@ -315,8 +315,8 @@ app.layout = html.Div([
                     dcc.Graph(figure={}, id="coldwar-graph")
                  ],style={"padding": 1, "flex":1, })
              )
-         ])
-     ], className="mb-5"),
+         ],width=4)
+     ], className="mb-4"),
 
      dbc.Row([
          dbc.Col([
