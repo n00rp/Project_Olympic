@@ -10,7 +10,6 @@ import random
 #--------------------------------------------------------------------------------------------------------------
 df = pd.read_csv("../athlete_events.csv")
 
-
 """ hashar namnen och droppar namn kolumnen """
 hashes = df["Name"].apply(lambda client_num: hl.sha256(client_num.encode()).hexdigest())
 df.insert(1, "SHA Hash Values", hashes)
@@ -62,14 +61,7 @@ wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
     "1994 Winter", "1998 Winter", "2002 Winter", "2006 Winter",
     "2010 Winter", "2014 Winter"]
 
-# Räknar antalet män och kvinnor över tid i OS.
-df_os_kon = df.groupby(["Year", "Season", "Sex"])["Name"].count().reset_index()
-df_os_kon = df_os_kon.rename(columns={"Name": "Antal"})
-sommar_os = df_os_kon[df_os_kon["Season"] == "Summer"]
-vinter_os = df_os_kon[df_os_kon["Season"] == "Winter"]
-
 #----------------------------------------------------------------------------------------------------------------
-
 
 def medalj_individ():
     fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=590, height=650)
@@ -255,8 +247,8 @@ app.layout = html.Div([
                  dbc.Row([
                      dbc.Col([
                         dcc.Tabs(id='tabs', value='tab-2', children=[
-                        dcc.Tab(label='Sommar-OS', value='tab-2', style={"color": "black"}), # Bytte färg på text pga av tema, den vita texten försvann
-                        dcc.Tab(label='Vinter-OS', value='tab-3', style={"color": "black"}),
+                        dcc.Tab(label='Sommar OS', value='tab-2', style={"color": "black"}), # Bytte färg på text pga av tema, den vita texten försvann
+                        dcc.Tab(label='Vinter OS', value='tab-3', style={"color": "black"}),
             ])], width=3),  # vänster kolumn
 
         dbc.Col([
@@ -358,15 +350,6 @@ app.layout = html.Div([
                                 value=sports[0]),
                             dcc.Graph(id="age-graph")
                     ])
-                )
-            ],width=5),
-            dbc.Col([
-                dbc.Card(
-                    dbc.CardBody([
-                            html.H1("Könsfördelningen i Sommar OS över tid"),
-                            dcc.RadioItems(options=["Summer games", "Winter games"], value="Winter games", id='gender-radio', style={"fontSize": "20px"}),
-                            dcc.Graph(id="gender-graph")
-                    ],style={"padding": 7, "flex":1, })
                 )
             ])
         ])
@@ -600,15 +583,6 @@ def update_graph(sport):
     # Returnera grafen
     return fig
 
-@app.callback(
-    Output("gender-graph", "figure"),
-    [Input("dropdown-gender-output", "value")])
-
-def update_graph(gender):
-    
-
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
