@@ -34,12 +34,10 @@ df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]
 temp_df = ger_df.drop_duplicates(subset=["Team","NOC","Games","Year","City","Sport","Event","Medal"])
 ny_team_variabel = temp_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 ny_team_variabel = temp_df[ny_team_variabel]
-test = ny_team_variabel.copy()
-
 
 """ Tabell på medaljer """
-test.loc[:, "Medaltot"] = 1
-df_grouped = test.groupby(['Year', 'Medal']).sum().reset_index()
+ny_team_variabel["Medaltot"] = 1
+df_grouped = ny_team_variabel.groupby(['Year', 'Medal']).sum().reset_index()
 df_pivot = df_grouped.pivot(index='Year', columns='Medal', values='Medaltot')# Pivot = Year blir x-axeln och Medal blir kolumner med en valör i varje. Values(Medeltot) får summan av varje valör per år.
 df_pivot_g = df_pivot["Gold"]
 df_pivot_s = df_pivot["Silver"]
@@ -66,23 +64,22 @@ wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
 
 
 def medalj_individ():
-    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=590, height=650)
+    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=550, height=650)
     fig.update_layout(title="Tyska Individuella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
     fig.update_xaxes(categoryorder="array", categoryarray=["Gold", "Silver", "Bronze"])
     return dcc.Graph(id="medalj_individ", figure=fig)
 
 def medalj_nation():
-    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=590, height=650)
+    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=550, height=650)
     fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
     fig.update_xaxes(categoryorder="array", categoryarray=["Gold", "Silver", "Bronze"])
     return dcc.Graph(id="medalj_nation", figure=fig)
 
 #------------------------------------------------------------------------------------------------------------------
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.MORPH])
+app = Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 app.layout = html.Div([
-
     dcc.Store(id='theme-store', data='light'),  # Lagrar det aktuella tema-värdet
     dcc.Dropdown(
         id='theme-dropdown',
@@ -95,36 +92,37 @@ app.layout = html.Div([
     dbc.Card(
         dbc.CardBody([
             html.H2("Välkommen till Olympiska Spelen!", className="card-title"),
-            html.P("Utforska medaljdata för Tyskland och andra nationer i de Olympiska spelen.", className="card-text, mb-4"),
-            html.Img(src='/assets/os_ringar.png', className="mb-4", style={'width': '30%', 'display': 'block', 'margin': '0 auto'}),
+            html.P("Utforska medaljdata för Tyskland och andra nationer i de Olympiska spelen.", className="card-text"),
+            html.Img(src='/assets/os_ringar.png', style={'width': '15%', 'display': 'block', 'margin': '0 auto'}),
         ]),
         className="mb-4 border-primary",  # Border och marginal
         style={"margin-top": "20px", "textAlign": "center"}
     ),
 
+    # Rubrik för OLYMPISKA SPELEN
+    html.H1("OLYMPISKA SPELEN", style={"textAlign": "center", "color": "blue"}),
+
+    # Horisontell linje
+    html.Hr(),
+
     # Rubrik för nästa sektion
-    dbc.Card(
-        dbc.CardBody([
-            html.H1("TYSKLAND", style={"textAlign": "center", "color": "white", "fontSize": "3em"}),
-        ]),
-        className="mb-4 border-primary",  # Border och marginal
-        style={"margin-top": "20px", "textAlign": "center"}
-    ),
+    html.H1("TYSKLAND", style={"textAlign": "center", "color": "black"}),
 
     # Flexbox container för vänster och höger card
     dbc.Row([
+        # Stort Card till vänster (8/12 bredd)
         dbc.Col(
             dbc.Card(
                 dbc.CardBody([
                     html.H4("Tyska Medaljer", className="card-title"),
                     dcc.Tabs([
-                        dcc.Tab(label="Individuella medaljer", children=[medalj_individ()], style={'padding': '20px',"color": "black"}),
-                        dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px', "color": "black"})
+                        dcc.Tab(label="Individuella medaljer", children=[medalj_individ()], style={'padding': '20px'}),
+                        dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px'})
                     ])
                 ]),
                 className="mb-3", style={"max-width": "100%", "margin": "0 auto"}
             ),
-            width=4  # 4 delar av en 12-kolumn layout för stort card
+            width=4  # 8 delar av en 12-kolumn layout för stort card
         ),
 
 
@@ -178,7 +176,7 @@ app.layout = html.Div([
                     className="mb-3", style={"height": "150px", "margin": "0"}
                 )
             ],
-            width=2  # 2 delar av en 12-kolumn layout för den högerkolumnen med små cards
+            width=2  # 4 delar av en 12-kolumn layout för den högerkolumnen med små cards
         ),# Kolumnen stängs här
 
         dbc.Col(
@@ -199,10 +197,10 @@ app.layout = html.Div([
                             {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"},
                         ],
                         style_table={'width': '100%', 'margin': '0 auto'},
-                        style_header={'fontWeight': 'bold'},
-                        style_cell={'textAlign': 'center', 'padding': '10px', "color": "black"},                      
+                        style_header={'backgroundColor': 'lightblue', 'fontWeight': 'bold'},
+                        style_cell={'textAlign': 'center', 'padding': '10px'},
                     )
-                ],className="table-striped table-bordered"), # Försöker lägga till temafärgen i tabellen
+                ]),
                 className="mb-3", style={"height": "auto", "width": "100%"}  # Flexibelt kort för tabellen
             ),
             dbc.Card(
@@ -220,37 +218,38 @@ app.layout = html.Div([
         )
         #skriv en ny kolumn här
 
-    ],className="mb-4"),# Raden stängs här
+
+    ]),# Raden stängs här
     
     dbc.Card(
         dbc.CardBody([
         html.Div([ 
         html.Div([
-            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio', style={"fontSize": "20px"}),
+            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio'),
             dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),  
         html.Div([
-            dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio', style={"fontSize": "20px"}),
+            dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio'),
             dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),                 
             ], style={"display": "flex", "flexDirection":"row"}),
+
+    dbc.Row([
+        dbc.Col([
+            html.Hr(),
+            html.H1("ALLA NATIONER", style={"textAlign": "center", "color": "black"}),
+            html.Hr(),
+        ])
+    ],className="mb-3"),
         ])
     ),
 
-    dbc.Card(
-        dbc.CardBody([
-            html.H1("ALLA NATIONER", style={"textAlign": "center", "color": "white"}),
-        ]),
-        className="mb-4 border-primary",  # Border och marginal
-        style={"margin-top": "20px", "textAlign": "center"}
-    ),
-
-    dbc.Container([
+     dbc.Container([
          dbc.Card(
              dbc.CardBody([
                  dbc.Row([
                      dbc.Col([
                         dcc.Tabs(id='tabs', value='tab-2', children=[
-                        dcc.Tab(label='Sommar OS', value='tab-2', style={"color": "black"}), # Bytte färg på text pga av tema, den vita texten försvann
-                        dcc.Tab(label='Vinter OS', value='tab-3', style={"color": "black"}),
+                        dcc.Tab(label='Sommar OS', value='tab-2'),
+                        dcc.Tab(label='Vinter OS', value='tab-3')
             ])], width=3),  # vänster kolumn
 
         dbc.Col([
@@ -259,13 +258,11 @@ app.layout = html.Div([
                     dcc.Dropdown(id='country-dropdown-2',
                                  options=[x for x in df['NOC'].unique()],
                                  multi=True,
-                                 value=['USA', 'SWE'],
-                                 style={'color': 'purple'}),                              
+                                 value=['USA', 'SWE']),
                     dcc.Dropdown(id='sport-dropdown',
                                  options=[{'label': sport, 'value': sport} for sport in sports],
                                  multi=True,
-                                 value=['Athletics', 'Swimming'],
-                                 style={'color': 'black'}),
+                                 value=['Athletics', 'Swimming']),
                     dcc.Graph(id='figure2'),
                     dcc.Graph(id='figure-medals')
                 ]),
@@ -273,13 +270,11 @@ app.layout = html.Div([
                     dcc.Dropdown(id='country-dropdown-3',
                                  options=[x for x in df['NOC'].unique()],
                                  multi=True,
-                                 value=['USA', 'SWE'],
-                                 style={'color': 'black'}),
+                                 value=['USA', 'SWE']),
                     dcc.Dropdown(id='sport-dropdown-3',
                                  options=[{'label': sport, 'value': sport} for sport in sports],
                                  multi=True,
-                                 value=['Alpine Skiing', 'Figure Skating'],
-                                 style={'color': 'black'}),
+                                 value=['Alpine Skiing', 'Figure Skating']),
                     dcc.Graph(id='figure3'),
                     dcc.Graph(id='figure-medals-3')
                 ])
@@ -302,8 +297,8 @@ app.layout = html.Div([
              dbc.Card(
                  dbc.CardBody([
                      dcc.RadioItems(options=[
-                            {"label": " Man", "value": "M"},
-                            {"label": " Kvinna", "value": "F"}], value="M", id='langdvikt-radio', style={"fontSize": "20px"}), # Ökat storleken på radioitem text
+                            {"label": "Man", "value": "M"},
+                            {"label": "Kvinna", "value": "F"}], value="M", id='langdvikt-radio'),
                      dcc.Graph(figure={}, id="langdvikt-graph")
                  ],style={"padding": 1, "flex":1, })
              )
@@ -311,18 +306,18 @@ app.layout = html.Div([
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
-                    dcc.RadioItems(options=["Winter games", "Summer games"], value="Winter games", id='coldwar-radio', style={"fontSize": "20px"}),
+                    dcc.RadioItems(options=["Winter games", "Summer games"], value="Winter games", id='coldwar-radio'),
                     dcc.Graph(figure={}, id="coldwar-graph")
                  ],style={"padding": 1, "flex":1, })
              )
          ])
-     ], className="mb-5"),
+     ]),
 
      dbc.Row([
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
-                     dcc.RadioItems(options=[" Deltagarländer", " Medaljländer"], value="Deltagarländer", id='controls-and-radio-item', style={"fontSize": "20px"}),
+                     dcc.RadioItems(options=["Deltagarländer", "Medaljländer"], value="Deltagarländer", id='controls-and-radio-item'),
                      dcc.Graph(figure={}, id='controls-and-graph')
                  ],style={"padding": 10, "flex":1, })
              )
@@ -339,7 +334,7 @@ app.layout = html.Div([
                  ])
              )
          ])
-     ], className="mb-5"),
+     ]),
 
         dbc.Row([
             dbc.Col([
@@ -356,6 +351,29 @@ app.layout = html.Div([
             ])
         ])
 
+
+ 
+       
+       # Skriv här
+        # dbc.Col([
+        #     dbc.Card(
+        #             dbc.CardBody([
+        #                 dcc.Dropdown(options=[
+        #                             {"label": "Sommar", "value": "Sommar"},
+        #                             {"label": "Vinter", "value": "Vinter"},
+        #                         ],  value= "Man", id="dropdown-gender"
+        #                 ),
+        #                 html.Div(id="dropdown-season_emil"),
+        #                 dcc.Graph(id="emil_top_sports")
+        #             ]),
+        #             className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
+        #         )
+        # ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
+        # )
+  # Raden stängs här
+
+
+    
 ]) # App.layout stängs här
 
 
@@ -371,7 +389,7 @@ def update_graph(medal):
         fig = px.line(df_pivot_s, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
     elif medal == "Bronze":
         fig = px.line(df_pivot_b, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
-    fig.update_layout(legend_title="Medalj")
+    fig.update_layout(legend_title="Valör")
     return fig
 
 @callback(
