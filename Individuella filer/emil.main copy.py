@@ -10,6 +10,7 @@ import random
 #--------------------------------------------------------------------------------------------------------------
 df = pd.read_csv("../athlete_events.csv")
 
+
 """ hashar namnen och droppar namn kolumnen """
 hashes = df["Name"].apply(lambda client_num: hl.sha256(client_num.encode()).hexdigest())
 df.insert(1, "SHA Hash Values", hashes)
@@ -63,6 +64,7 @@ wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
 
 #----------------------------------------------------------------------------------------------------------------
 
+
 def medalj_individ():
     fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=590, height=650)
     fig.update_layout(title="Tyska Individuella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
@@ -78,7 +80,6 @@ def medalj_nation():
 #------------------------------------------------------------------------------------------------------------------
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.MORPH])
-
 
 app.layout = html.Div([
 
@@ -248,8 +249,6 @@ app.layout = html.Div([
                  dbc.Row([
                      dbc.Col([
                         dcc.Tabs(id='tabs', value='tab-2', children=[
-                        dcc.Tab(label='Sommar OS', value='tab-2', style={"color": "black"}), # Bytte färg på text pga av tema, den vita texten försvann
-                        dcc.Tab(label='Vinter OS', value='tab-3', style={"color": "black"}),
                         dcc.Tab(label='Sommar OS', value='tab-2', style={"color": "black"}), # Bytte färg på text pga av tema, den vita texten försvann
                         dcc.Tab(label='Vinter OS', value='tab-3', style={"color": "black"}),
             ])], width=3),  # vänster kolumn
@@ -586,6 +585,29 @@ def update_graph(sport):
     # Returnera grafen
     return fig
 
+# @callback(
+#     Output("dd_gender_graph", "figure"),
+#     Input("dropdown-gender-output", "value")
+# )
+
+# def update_graph(gender):
+#     pass
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+     # dbc.Col([
+        #     dbc.Card(
+        #             dbc.CardBody([
+        #                 dcc.Dropdown(options=[
+        #                             {"label": "Man", "value": "Man"},
+        #                             {"label": "Kvinna", "value": "Kvinna"},
+        #                         ],  value= "Man", id="dropdown-gender-output"
+        #                 ),
+        #                 dcc.Graph(id="dd_gender_graph")
+        #             ]),
+        #             className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
+        #         )  
+        # ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
+        # ),
