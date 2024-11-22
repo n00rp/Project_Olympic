@@ -561,50 +561,18 @@ def age_histogram(sport_selected):
 
     return fig
 
-# Definiera en funktion som uppdaterar grafen när användaren väljer en ny sport
 @app.callback(
     Output("age-graph", "figure"),
     [Input("sport-dropdown1", "value")]
 )
 def update_graph(sport):
-    # Filtrera data för den valda sporten
     df_sport = df[df["Sport"] == sport]
     df_sport = df_sport.dropna()
-
-    # Skapar en hexadecimal färgkod och slumpar olika färger i grafen.
     colors = ["#" + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(len(df_sport))]
-
-    # Räknar antalet deltagare vid varje ålder.
     age_counts = df_sport[df_sport["Age"].notnull()]["Age"].value_counts().sort_index()
     # Skapa ett linjediagram för åldersfördelningen
     fig = px.line(x=age_counts.index, y=age_counts.values, title="Åldersfördelning i " + sport, labels={"x": "Ålder", "y": "Antal deltagare"}, color_discrete_sequence=colors)
-
-    # Returnera grafen
     return fig
-
-# @callback(
-#     Output("dd_gender_graph", "figure"),
-#     Input("dropdown-gender-output", "value")
-# )
-
-# def update_graph(gender):
-#     pass
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-     # dbc.Col([
-        #     dbc.Card(
-        #             dbc.CardBody([
-        #                 dcc.Dropdown(options=[
-        #                             {"label": "Man", "value": "Man"},
-        #                             {"label": "Kvinna", "value": "Kvinna"},
-        #                         ],  value= "Man", id="dropdown-gender-output"
-        #                 ),
-        #                 dcc.Graph(id="dd_gender_graph")
-        #             ]),
-        #             className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
-        #         )  
-        # ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
-        # ),
