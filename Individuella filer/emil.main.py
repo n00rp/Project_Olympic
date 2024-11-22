@@ -86,7 +86,7 @@ def medalj_nation():
 #------------------------------------------------------------------------------------------------------------------
 
 app = Dash(__name__, external_stylesheets=[dbc.themes.MORPH])
-
+server = app.server
 app.layout = html.Div([
 
     dcc.Store(id='theme-store', data='light'),  # Lagrar det aktuella tema-värdet
