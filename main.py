@@ -8,7 +8,7 @@ import plotly.graph_objects as go
 import hashlib as hl
 import random
 #--------------------------------------------------------------------------------------------------------------
-df = pd.read_csv("../athlete_events.csv")
+df = pd.read_csv("athlete_events.csv")
 
 
 """ hashar namnen och droppar namn kolumnen """
@@ -66,13 +66,15 @@ wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
 
 
 def medalj_individ():
-    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=590, height=650)
+    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=550, height=650)
     fig.update_layout(title="Tyska Individuella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
+    fig.update_xaxes(categoryorder="array", categoryarray=["Gold", "Silver", "Bronze"])
     return dcc.Graph(id="medalj_individ", figure=fig)
 
 def medalj_nation():
-    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=590, height=650)
+    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=550, height=650)
     fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
+    fig.update_xaxes(categoryorder="array", categoryarray=["Gold", "Silver", "Bronze"])
     return dcc.Graph(id="medalj_nation", figure=fig)
 
 #------------------------------------------------------------------------------------------------------------------
@@ -369,6 +371,7 @@ def update_graph(medal):
         fig = px.line(df_pivot_s, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
     elif medal == "Bronze":
         fig = px.line(df_pivot_b, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
+    fig.update_layout(legend_title="Medalj")
     return fig
 
 @callback(
