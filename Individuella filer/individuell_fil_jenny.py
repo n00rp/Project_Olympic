@@ -5,8 +5,10 @@ import pandas as pd
 import hashlib as hl
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly.express as px
 
-df = pd.read_csv("Project_Olympic/athlete_events.csv")
+
+df = pd.read_csv("../athlete_events.csv")
 
 # anonymisera kolumnerna med idrotternas namn
 df_anonym = df.copy()
