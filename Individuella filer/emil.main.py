@@ -26,7 +26,7 @@ medal = ger_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 medals = ger_df[medal]
 color1 = ["silver", "orange", "gold"]
 
-"""" Björns filtrering av medaljer """
+"""" Filtrering av medaljer """
 df_ger=df[df["NOC"]=="GER"]                                                 # Alla tyska deltagare
 df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]  
 
@@ -61,6 +61,12 @@ wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
     "1980 Winter", "1984 Winter", "1988 Winter", "1992 Winter",
     "1994 Winter", "1998 Winter", "2002 Winter", "2006 Winter",
     "2010 Winter", "2014 Winter"]
+
+# Räknar antalet män och kvinnor över tid i OS.
+df_os_kon = df.groupby(["Year", "Season", "Sex"])["Name"].count().reset_index()
+df_os_kon = df_os_kon.rename(columns={"Name": "Antal"})
+sommar_os = df_os_kon[df_os_kon["Season"] == "Summer"]
+vinter_os = df_os_kon[df_os_kon["Season"] == "Winter"]
 
 #----------------------------------------------------------------------------------------------------------------
 
@@ -249,8 +255,8 @@ app.layout = html.Div([
                  dbc.Row([
                      dbc.Col([
                         dcc.Tabs(id='tabs', value='tab-2', children=[
-                        dcc.Tab(label='Sommar OS', value='tab-2', style={"color": "black"}), # Bytte färg på text pga av tema, den vita texten försvann
-                        dcc.Tab(label='Vinter OS', value='tab-3', style={"color": "black"}),
+                        dcc.Tab(label='Sommar-OS', value='tab-2', style={"color": "black"}), # Bytte färg på text pga av tema, den vita texten försvann
+                        dcc.Tab(label='Vinter-OS', value='tab-3', style={"color": "black"}),
             ])], width=3),  # vänster kolumn
 
         dbc.Col([
@@ -352,6 +358,15 @@ app.layout = html.Div([
                                 value=sports[0]),
                             dcc.Graph(id="age-graph")
                     ])
+                )
+            ],width=5),
+            dbc.Col([
+                dbc.Card(
+                    dbc.CardBody([
+                            html.H1("Könsfördelningen i Sommar OS över tid"),
+                            dcc.RadioItems(options=["Summer games", "Winter games"], value="Winter games", id='gender-radio', style={"fontSize": "20px"}),
+                            dcc.Graph(id="gender-graph")
+                    ],style={"padding": 7, "flex":1, })
                 )
             ])
         ])
@@ -585,29 +600,15 @@ def update_graph(sport):
     # Returnera grafen
     return fig
 
-# @callback(
-#     Output("dd_gender_graph", "figure"),
-#     Input("dropdown-gender-output", "value")
-# )
+@app.callback(
+    Output("gender-graph", "figure"),
+    [Input("dropdown-gender-output", "value")])
 
-# def update_graph(gender):
-#     pass
+def update_graph(gender):
+    
+
 
 if __name__ == '__main__':
     app.run(debug=True)
 
 
-     # dbc.Col([
-        #     dbc.Card(
-        #             dbc.CardBody([
-        #                 dcc.Dropdown(options=[
-        #                             {"label": "Man", "value": "Man"},
-        #                             {"label": "Kvinna", "value": "Kvinna"},
-        #                         ],  value= "Man", id="dropdown-gender-output"
-        #                 ),
-        #                 dcc.Graph(id="dd_gender_graph")
-        #             ]),
-        #             className="mb-3", style={"width": "100%"}  # Flexibelt kort för dropdownen
-        #         )  
-        # ],width=6  # 3 delar av en 12-kolumn layout för tabellen och dropdown
-        # ),

@@ -5,8 +5,9 @@ import pandas as pd
 import hashlib as hl
 import matplotlib.pyplot as plt
 import seaborn as sns
+import plotly_express as px
 
-df = pd.read_csv("Project_Olympic/athlete_events.csv")
+df = pd.read_csv("../athlete_events.csv")
 
 # anonymisera kolumnerna med idrotternas namn
 df_anonym = df.copy()
@@ -84,14 +85,14 @@ df_os_kon = df_os_kon.rename(columns={"Name": "Antal"})
 sommar_os = df_os_kon[df_os_kon["Season"] == "Summer"]
 plt.figure(figsize=(12, 14), dpi=100)
 plt.subplot(3, 2, 1)
-sns.lineplot(x="Year", y="Antal", hue="Sex", data=sommar_os, palette=["red", "blue"])
+fig = px.line(x="Year", y="Antal", color=["red", "blue"])
 plt.title("Könsfördelningen i sommar OS över tid")
 plt.xlabel("År")
 plt.ylabel("Antal deltagare")
 
 vinter_os = df_os_kon[df_os_kon["Season"] == "Winter"]
 plt.subplot(3, 2, 2)
-sns.lineplot(x="Year", y="Antal", hue="Sex", data=vinter_os, palette=["blue", "red"])
+fig = px.line(x="Year", y="Antal", color=["blue", "red"])
 plt.title("Könsfördelningen i vinter OS över tid")
 plt.xlabel("År")
 plt.ylabel("Antal deltagare")
