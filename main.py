@@ -55,12 +55,7 @@ fig3=px.bar(df_skidor_medaljer["NOC"].value_counts(), labels={"NOC": "Land", "va
 fig3.update_layout(showlegend=False)
 
 # Definiera lista med vinter-OS
-wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
-    "1948 Winter", "1952 Winter", "1956 Winter", "1960 Winter",
-    "1964 Winter", "1968 Winter", "1972 Winter", "1976 Winter",
-    "1980 Winter", "1984 Winter", "1988 Winter", "1992 Winter",
-    "1994 Winter", "1998 Winter", "2002 Winter", "2006 Winter",
-    "2010 Winter", "2014 Winter"]
+wo = df[df["Season"] == "Winter"].sort_values(by=["Year"])["Games"].unique().tolist()
 
 #----------------------------------------------------------------------------------------------------------------
 
@@ -372,7 +367,7 @@ app.layout = html.Div([
 ]) # App.layout stängs här
 
 
-@callback(
+@app.callback(
     Output("dd_graph", "figure"),
     Input("dropdown-item", "value")
 )
@@ -387,7 +382,7 @@ def update_graph(medal):
     fig.update_layout(legend_title="Medalj")
     return fig
 
-@callback(
+@app.callback(
     Output('tabs-content', 'children'),
     Input('tabs', 'value')
 )
@@ -420,7 +415,7 @@ def render_content(tab):
             dcc.Graph(id='figure-medals-3')
         ])
 
-@callback(
+@app.callback(
     Output('figure2', 'figure'), #Figure är en fastställd syntax och kopplas till grafen
     Input('country-dropdown-2', 'value'),
     Input('sport-dropdown', 'value')
@@ -434,7 +429,7 @@ def update_graph(country_selected, sports_selected):
     return fig
 
 
-@callback(
+@app.callback(
     Output('figure-medals', 'figure'), #Figure är en fastställd syntax och kopplas till grafen
     Input('country-dropdown-2', 'value'),
     Input('sport-dropdown', 'value')
@@ -447,7 +442,7 @@ def update_medals(country_selected, sports_selected):
     fig = px.pie(df_medals, values='Antal medaljer', names='Medal')
     fig.update_layout(title='Antalet medaljer i valda sporterna')
     return fig
-@callback(
+@app.callback(
     Output('figure3', 'figure'),
     Input('country-dropdown-3', 'value'),
     Input('sport-dropdown-3', 'value')
@@ -460,7 +455,7 @@ def update_graph(country_selected, sports_selected):
     fig.update_yaxes(title='Antal deltagare')
     return fig
 
-@callback(
+@app.callback(
     Output('figure-medals-3', 'figure'),
     Input('country-dropdown-3', 'value'),
     Input('sport-dropdown-3', 'value')
@@ -511,7 +506,7 @@ def update_graph(barval):
     fig.update_layout(yaxis_title="Procent")
     return fig
 
-@callback(
+@app.callback(
     Output('langdvikt-graph', 'figure'),
     [Input('langdvikt-radio', 'value')]
 )
@@ -554,7 +549,7 @@ def coldwar_func(sw_choice):
 )
 def cross_country_countries(cc_yval):
     cc_delt=[]
-    for j in wo:                                                    #Kolla om det finns möjlighet att göra detta till en lista? 
+    for j in wo:                                                    
         df_year=df[df["Games"]==j]
         df_year_skidor=df_year[df_year["Sport"]=="Cross Country Skiing"]
         df_year_skidor_medals=df_year_skidor[df_year_skidor["Medal"].isin(["Gold", "Silver", "Bronze"])]
