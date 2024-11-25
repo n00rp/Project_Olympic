@@ -20,6 +20,7 @@ df = drop
 """ Tar alla unika sporter """
 sports = df['Sport'].unique()
 
+
 """ Tabell på antal medaljer per individ i tyskland """
 ger_df = df[df["NOC"] == "GER"]
 medal = ger_df["Medal"].isin(["Gold", "Silver", "Bronze"])
@@ -31,10 +32,15 @@ df_ger=df[df["NOC"]=="GER"]                                                 # Al
 df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]  
 
 """ Tabell på medaljer som nation i Tyskland """
+
 temp_df = ger_df.drop_duplicates(subset=["Team","NOC","Games","Year","City","Sport","Event","Medal"])
 ny_team_variabel = temp_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 ny_team_variabel = temp_df[ny_team_variabel]
 test = ny_team_variabel.copy()
+medal_list = test["Medal"].value_counts()
+antal_guld = medal_list[0]
+antal_silver = medal_list[1]
+antal_bronze = medal_list[2]
 
 
 """ Tabell på medaljer """
@@ -102,18 +108,18 @@ app.layout = html.Div([
     ),
     #Rad 3 - Tyska medaljer
     dbc.Row([
-        dbc.Col(
+                dbc.Col(
             dbc.Card(
                 dbc.CardBody([
-                    html.H4("Tyska Medaljer"),
-                    dcc.Tabs([
-                        dcc.Tab(label="Individuella medaljer", children=[medalj_individ()], style={'padding': '20px',"color": "black"}),
-                        dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px', "color": "black"})
+                    html.H4("Tyska Medaljer", className="card-title"),
+                    dcc.Tabs(id="tabbar", children=[
+                        dcc.Tab(label="Individuella medaljer", children=[medalj_individ()], style={'padding': '20px',"color": "black"}, value="tab_ind"),
+                        dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px', "color": "black"}, value="tab_nat")
                     ])
                 ]),
                 className="mb-3", style={"max-width": "100%", "margin": "0 auto"}
             ),
-            width=4  # 4 delar av en 12-kolumn layout för stort card
+            width=4,  # 4 delar av en 12-kolumn layout för stort card
         ),
 
         #Rad 3 - Mitten kolumn
@@ -125,10 +131,9 @@ app.layout = html.Div([
                             className="d-flex align-items-center",
                             children=[
                                 html.Img(src='/assets/guld.png', style={'width': '21%', 'margin-right': '10px'}),  # Bild till vänster
-                                html.Div([
-                                    html.H4("745", className="card-text"),          #TO DO!! Skapa en automatisk uträkning av medaljer! 
-                                    html.P("Guld medaljer", className="card-text")
-                                ])
+                                html.Div(
+                                    html.Div(id="medalj_ind_gold")
+                                )
                             ]
                         ),
                     ]),
@@ -141,10 +146,9 @@ app.layout = html.Div([
                             className="d-flex align-items-center",
                             children=[
                                 html.Img(src='/assets/silver.png', style={'width': '21%', 'margin-right': '10px'}),  # Bild till vänster
-                                html.Div([
-                                    html.H4("674", className="card-text"),
-                                    html.P("Silver medaljer", className="card-text")
-                                ])
+                                html.Div(
+                                html.Div(id="medalj_ind_silver")
+                                )
                             ]
                         ),
                     ]),
@@ -157,10 +161,9 @@ app.layout = html.Div([
                             className="d-flex align-items-center",
                             children=[
                                 html.Img(src='/assets/bronz.png', style={'width': '24%', 'margin-right': '10px'}),  # Bild till vänster
-                                html.Div([
-                                    html.H4("746", className="card-text"),
-                                    html.P("Brons medaljer", className="card-text")
-                                ])
+                                html.Div(
+                                    html.Div(id="medalj_ind_bronze")
+                                )
                             ]
                         ),
                     ]),
@@ -367,6 +370,41 @@ app.layout = html.Div([
 ]) # App.layout stängs här
 
 
+@app.callback(
+    Output("medalj_ind_gold", "children"),
+    Input("tabbar", "value")
+)
+def medalj(value):
+    if value == "tab_ind":
+        return [html.H4("745", className="card-text"),
+                html.P("Guld medaljer", className="card-text")]
+    else:
+        return [html.H4(f"{antal_guld}", className="card-text"),
+                html.P("Guld medaljer", className="card-text")]
+
+@app.callback(
+    Output("medalj_ind_silver", "children"),
+    Input("tabbar", "value")
+)
+def medalj(value):
+    if value == "tab_ind":
+        return [html.H4("674", className="card-text"),
+                html.P("Silver medaljer", className="card-text")]
+    else:
+        return [html.H4(f"{antal_silver}", className="card-text"),
+                html.P("Silver medaljer", className="card-text")]
+
+@app.callback(
+    Output("medalj_ind_bronze", "children"),
+    Input("tabbar", "value")
+)
+def medalj(value):
+    if value == "tab_ind":
+        return [html.H4("746", className="card-text"),
+                html.P("Bronze medaljer", className="card-text")]
+    else:
+        return [html.H4(f"{antal_bronze}", className="card-text"),
+                html.P("Bronze medaljer", className="card-text")]
 @app.callback(
     Output("dd_graph", "figure"),
     Input("dropdown-item", "value")
@@ -582,6 +620,7 @@ def age_line(sport):
     # Skapa ett linjediagram för åldersfördelningen
     fig = px.line(x=age_counts.index, y=age_counts.values, title="Åldersfördelning i " + sport, labels={"x": "Ålder", "y": "Antal deltagare"}, color_discrete_sequence=colors)
     return fig
+
 
 if __name__ == '__main__':
     app.run(debug=True)
