@@ -1,13 +1,13 @@
 import plotly.express as px
-import matplotlib.pyplot as plt
 import pandas as pd
-from dash import Dash, html, dcc, callback, Output, Input, State, html, dash_table
+from dash import Dash, html, dcc, callback, html, dash_table
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-import plotly.graph_objects as go
 import hashlib as hl
 import random
+
 #--------------------------------------------------------------------------------------------------------------
+
 df = pd.read_csv("athlete_events.csv")
 
 
