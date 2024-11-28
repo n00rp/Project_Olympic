@@ -1,14 +1,14 @@
 import plotly.express as px
-import matplotlib.pyplot as plt
 import pandas as pd
-from dash import Dash, html, dcc, callback, Output, Input, State, html, dash_table
+from dash import Dash, html, dcc, callback, html, dash_table
 from dash.dependencies import Input, Output
 import dash_bootstrap_components as dbc
-import plotly.graph_objects as go
 import hashlib as hl
 import random
+
 #--------------------------------------------------------------------------------------------------------------
-df = pd.read_csv("../athlete_events.csv")
+
+df = pd.read_csv("athlete_events.csv")
 
 
 """ hashar namnen och droppar namn kolumnen """
@@ -19,6 +19,7 @@ df = drop
 
 """ Tar alla unika sporter """
 sports = df['Sport'].unique()
+
 
 """ Tabell på antal medaljer per individ i tyskland """
 ger_df = df[df["NOC"] == "GER"]
@@ -31,16 +32,21 @@ df_ger=df[df["NOC"]=="GER"]                                                 # Al
 df_ger_medals=df_ger[df_ger["Medal"].isin(["Gold", "Silver", "Bronze"])]  
 
 """ Tabell på medaljer som nation i Tyskland """
+
 temp_df = ger_df.drop_duplicates(subset=["Team","NOC","Games","Year","City","Sport","Event","Medal"])
 ny_team_variabel = temp_df["Medal"].isin(["Gold", "Silver", "Bronze"])
 ny_team_variabel = temp_df[ny_team_variabel]
 test = ny_team_variabel.copy()
+medal_list = test["Medal"].value_counts()
+antal_guld = medal_list[0]
+antal_silver = medal_list[1]
+antal_bronze = medal_list[2]
 
 
 """ Tabell på medaljer """
 test.loc[:, "Medaltot"] = 1
 df_grouped = test.groupby(['Year', 'Medal']).sum().reset_index()
-df_pivot = df_grouped.pivot(index='Year', columns='Medal', values='Medaltot')# Pivot = Year blir x-axeln och Medal blir kolumner med en valör i varje. Values(Medeltot) får summan av varje valör per år.
+df_pivot = df_grouped.pivot(index='Year', columns='Medal', values='Medaltot') # Pivot = Year blir x-axeln och Medal blir kolumner med en valör i varje. Values(Medeltot) får summan av varje valör per år.
 df_pivot_g = df_pivot["Gold"]
 df_pivot_s = df_pivot["Silver"]
 df_pivot_b = df_pivot["Bronze"]
@@ -51,52 +57,44 @@ df_skidor=df[df["Sport"]=="Cross Country Skiing"]
 df_skidor_medaljer=df_skidor[df_skidor["Medal"].isin(["Gold", "Silver", "Bronze"])]
 df_skidor_medaljer["NOC"].value_counts()
 
-fig3=px.bar(df_skidor_medaljer["NOC"].value_counts(), labels={"NOC": "Land", "value": "Antal medaljer"}, title=("Länder som tagit medalj i längdskidor"))
+fig3=px.bar(df_skidor_medaljer["NOC"].value_counts(), labels={"NOC": "Land", "value": "Antal medaljer"})
 fig3.update_layout(showlegend=False)
 
 # Definiera lista med vinter-OS
-wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
-    "1948 Winter", "1952 Winter", "1956 Winter", "1960 Winter",
-    "1964 Winter", "1968 Winter", "1972 Winter", "1976 Winter",
-    "1980 Winter", "1984 Winter", "1988 Winter", "1992 Winter",
-    "1994 Winter", "1998 Winter", "2002 Winter", "2006 Winter",
-    "2010 Winter", "2014 Winter"]
+wo = df[df["Season"] == "Winter"].sort_values(by=["Year"])["Games"].unique().tolist()
 
 #----------------------------------------------------------------------------------------------------------------
 
 
 def medalj_individ():
-    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1)
-    fig.update_layout(title="Tyska Individuella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
+    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, height=705, width=631)
+    fig.update_layout(title="Tyska Individuella Medaljer", yaxis_title="Antal")
+    fig.update_xaxes(categoryorder="array", categoryarray=["Gold", "Silver", "Bronze"])
     return dcc.Graph(id="medalj_individ", figure=fig)
 
 def medalj_nation():
-    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1)
-    fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
+    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, height=705, width=631)
+    fig.update_layout(title="Tyska Nationella Medaljer", yaxis_title="Antal")
+    fig.update_xaxes(categoryorder="array", categoryarray=["Gold", "Silver", "Bronze"])
     return dcc.Graph(id="medalj_nation", figure=fig)
 
 #------------------------------------------------------------------------------------------------------------------
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.QUARTZ])
+#Layout startar
 
+app = Dash(__name__, external_stylesheets=[dbc.themes.QUARTZ])  #Layout tema
+server = app.server  #Server till Render
 app.layout = html.Div([
 
-    dcc.Store(id='theme-store', data='light'),  # Lagrar det aktuella tema-värdet
-    dcc.Dropdown(
-        id='theme-dropdown',
-        options=[
-            {'label': 'Ljus', 'value': 'light'},
-            {'label': 'Mörk', 'value': 'dark'}
-        ],
-        value='light'  # Standardvärde
-    ),
+
+    # Rubrik för OLYMPISKA SPELEN
     dbc.Card(
         dbc.CardBody([
-            html.H2("Välkommen till Olympiska Spelen!", className="card-title"),
+            html.H2("Välkommen till Olympiska Spelen!"),
             html.P("Utforska medaljdata för Tyskland och andra nationer i de Olympiska spelen.", className="card-text, mb-4"),
             html.Img(src='/assets/os_ringar.png', className="mb-4", style={'width': '30%', 'display': 'block', 'margin': '0 auto'}),
         ]),
-        className="mb-4 border-primary",  # Border och marginal
+        className="mb-4 border-primary",  # Border och marginal för att skapa utrymme mellan rubriken och korten
         style={"margin-top": "20px", "textAlign": "center"}
     ),
 
@@ -108,10 +106,9 @@ app.layout = html.Div([
         className="mb-4 border-primary",  # Border och marginal
         style={"margin-top": "20px", "textAlign": "center"}
     ),
-
-    # Flexbox container för vänster och höger card
+    #Rad 3 - Tyska medaljer
     dbc.Row([
-        dbc.Col(
+                dbc.Col(
             dbc.Card(
                 dbc.CardBody([
                     html.H4("Tyska Medaljer", className="card-title"),
@@ -125,7 +122,7 @@ app.layout = html.Div([
             width=4,  # 4 delar av en 12-kolumn layout för stort card
         ),
 
-
+        #Rad 3 - Mitten kolumn
         dbc.Col(
             children=[
                 dbc.Card(
@@ -174,7 +171,8 @@ app.layout = html.Div([
                 )
             ],
             width=2  # 2 delar av en 12-kolumn layout för den högerkolumnen med små cards
-        ),# Kolumnen stängs här
+
+        ),# Mitten kolumnen stängs (medalj bilder)
 
         dbc.Col(
         children=[
@@ -193,13 +191,14 @@ app.layout = html.Div([
                             {"stad": "Berlin", "os_type": "Sommar OS", "year": "1936"},
                             {"stad": "Garmisch-Partenkirchen", "os_type": "Vinter OS", "year": "1936"},
                         ],
-                        style_table={'width': '100%', 'margin': '0 auto'},
-                        style_header={'fontWeight': 'bold'},
-                        style_cell={'textAlign': 'center', 'padding': '10px', "color": "black"},                      
+                        style_table={'width': '100%', 'margin': '0 auto'}, #Bredden på kolumnen
+                        style_header={'fontWeight': 'bold'}, #Texten är BOLD
+                        style_cell={'textAlign': 'center', 'padding': '10px', "color": "black"},  #Texten skall vara i mitten, med padding och texten ska vara svart                    
                     )
                 ],className="table-striped table-bordered"), # Försöker lägga till temafärgen i tabellen
                 className="mb-3", style={"height": "auto", "width": "100%"}  # Flexibelt kort för tabellen
             ),
+            #Denna är samma rad och kolumn som ovan.
             dbc.Card(
                 dbc.CardBody([
                     dcc.Dropdown(options=[
@@ -211,25 +210,30 @@ app.layout = html.Div([
                     dcc.Graph(id="dd_graph")
                 ])
             )
-        ]
+        ], width=6
         )
         #skriv en ny kolumn här
+    #Rad 3 stängs 
 
-    ],className="mb-3"),# Raden stängs här
-    
-    dbc.Card(
-        dbc.CardBody([
-        html.Div([ 
-        html.Div([
-            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio', style={"fontSize": "20px", "display": "block", "marginleft": "10px"}),
-            dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),  
-        html.Div([
-            dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio', style={"fontSize": "20px"}),
-            dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),                 
-            ], style={"display": "flex", "flexDirection":"row"}),
-        ])
-    ),
+    ],className="mb-3"),
+    #Rad 4 startar
+    dbc.Row([
+        dbc.Card(
+            dbc.CardBody([
+                html.Div([ 
+                    html.Div([
+                        dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio', style={"fontSize": "20px"}),
+                        dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),  
+                    html.Div([
+                        dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio', style={"fontSize": "20px"}),
+                        dcc.Graph(figure={}, id='bar-graph'),],style={"padding": 10, "flex":1, }),                 
+                        ], style={"display": "flex", "flexDirection":"row"}),
+            ])
+        )
+    ]),
+    #Rad 4 stängs
 
+    #Rad 5 Startar - Alla nationer - Rubrik
     dbc.Card(
         dbc.CardBody([
             html.H1("ALLA NATIONER", style={"textAlign": "center", "color": "white"}),
@@ -237,7 +241,9 @@ app.layout = html.Div([
         className="mb-4 border-primary",  # Border och marginal
         style={"margin-top": "20px", "textAlign": "center"}
     ),
+    #Rad 5 stängs
 
+    #Rad 6 startar
     dbc.Container([
          dbc.Card(
              dbc.CardBody([
@@ -283,64 +289,73 @@ app.layout = html.Div([
     ])
              ]),className="mb-3"
          )
-     ], fluid=True),
+     ], fluid=True), #Detta gör att grafen "flyter" ut i kanterna så man slipper den vita bordern
+    #Rad 6 stängs
 
-    dbc.Row([
+    #Rad 7 startar
+     dbc.Row([
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
+                     dcc.Markdown("Sammanlagda medaljställningen i längdskidor", style={"fontSize": "30px"}),
                      dcc.Graph(figure=fig3)
-                 ],style={"padding": 1, "flex":1, })
+                 ],style={"padding": 15, "flex":1, })
              )
-         ],width=4),
+         ],width=4), 
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
+                     dcc.Markdown("Längd och vikt i några utvalda sporter", style={"fontSize": "30px"}),
                      dcc.RadioItems(options=[
                             {"label": "Man", "value": "M"},
                             {"label": "Kvinna", "value": "F"}], value="M", id='langdvikt-radio', style={"fontSize": "20px"}), # Ökat storleken på radioitem text
                      dcc.Graph(figure={}, id="langdvikt-graph")
-                 ],style={"padding": 1, "flex":1, })
+                 ],style={"padding": 15, "flex":1, })
              )
          ],width=4),
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
+                    dcc.Markdown("Västtyskland och Östtyskland under Kalla kriget", style={"fontSize": "30px"}),
                     dcc.RadioItems(options=["Winter games", "Summer games"], value="Winter games", id='coldwar-radio', style={"fontSize": "20px"}),
                     dcc.Graph(figure={}, id="coldwar-graph")
-                 ],style={"padding": 1, "flex":1, })
+                 ],style={"padding": 15, "flex":1, })
              )
          ],width=4)
-    ], className="mb-4"),
+     ], className="mb-4"),
 
      dbc.Row([
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
+                     dcc.Markdown("Utvecklingen av länder i längdskidåkning" , style={"fontSize": "30px"}),
                      dcc.RadioItems(options=["Deltagarländer", "Medaljländer"], value="Deltagarländer", id='controls-and-radio-item', style={"fontSize": "20px"}),
                      dcc.Graph(figure={}, id='controls-and-graph')
-                 ],style={"padding": 10, "flex":1, })
+                 ],style={"padding": 15, "flex":1, })
              )
          ],width=5),
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
-                     dcc.Markdown("Åldersfördelning i respektive sport"),
+                     dcc.Markdown("Åldersfördelning i respektive sport", style={"fontSize": "30px"}),
                      dcc.Dropdown(id='sport',
-                         options=[x for x in ["Sailing", "Curling", "Football", "Handball"]],
+                         options=[x for x in ["Sailing", "Curling", "Football", "Handball", "Cross Country Skiing"]],
                          multi=True,
                          value=['Curling', 'Handball']),
                          dcc.Graph(id='figure1')   
-                 ])
+                 ], style={"padding": 15, "flex":1, })
              )
          ])
-     ], className="mb-5"),
+         #Rad 7 stängs
+
+         #Rad 8 startar
+     ], className="mb-3"),
 
         dbc.Row([
             dbc.Col([
                 dbc.Card(
                     dbc.CardBody([
-                            html.H1("Åldersfördelning i OS"),
+                            html.H5("Åldersfördelning i OS"),
                             dcc.Dropdown(
                                 id="sport-dropdown1",
                                 options=[{"label": sport, "value": sport} for sport in sports],
@@ -350,8 +365,11 @@ app.layout = html.Div([
                 )
             ])
         ])
-
+        #Rad 8 stängs
+           
 ]) # App.layout stängs här
+
+
 @app.callback(
     Output("medalj_ind_gold", "children"),
     Input("tabbar", "value")
@@ -361,9 +379,8 @@ def medalj(value):
         return [html.H4("745", className="card-text"),
                 html.P("Guld medaljer", className="card-text")]
     else:
-        return [html.H4("1", className="card-text"),
+        return [html.H4(f"{antal_guld}", className="card-text"),
                 html.P("Guld medaljer", className="card-text")]
-
 
 @app.callback(
     Output("medalj_ind_silver", "children"),
@@ -374,9 +391,8 @@ def medalj(value):
         return [html.H4("674", className="card-text"),
                 html.P("Silver medaljer", className="card-text")]
     else:
-        return [html.H4("2", className="card-text"),
+        return [html.H4(f"{antal_silver}", className="card-text"),
                 html.P("Silver medaljer", className="card-text")]
-    
 
 @app.callback(
     Output("medalj_ind_bronze", "children"),
@@ -387,12 +403,9 @@ def medalj(value):
         return [html.H4("746", className="card-text"),
                 html.P("Bronze medaljer", className="card-text")]
     else:
-        return [html.H4("3", className="card-text"),
+        return [html.H4(f"{antal_bronze}", className="card-text"),
                 html.P("Bronze medaljer", className="card-text")]
-
-
-
-@callback(
+@app.callback(
     Output("dd_graph", "figure"),
     Input("dropdown-item", "value")
 )
@@ -404,16 +417,16 @@ def update_graph(medal):
         fig = px.line(df_pivot_s, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
     elif medal == "Bronze":
         fig = px.line(df_pivot_b, title="Medaljer per År", labels={'value': 'Antal Medaljer'})
+    fig.update_layout(legend_title="Medalj")
     return fig
 
-@callback(
+@app.callback(
     Output('tabs-content', 'children'),
     Input('tabs', 'value')
 )
 def render_content(tab):
-    if tab == 'tab-1':
-        return tab_1_layout
-    elif tab == 'tab-2':
+
+    if tab == 'tab-2':
         return html.Div(id='tab-2-content', children=[
             dcc.Dropdown(id='country-dropdown-2',
                          options=[x for x in df['NOC'].unique()],
@@ -440,8 +453,8 @@ def render_content(tab):
             dcc.Graph(id='figure-medals-3')
         ])
 
-@callback(
-    Output('figure2', 'figure'),
+@app.callback(
+    Output('figure2', 'figure'), #Figure är en fastställd syntax och kopplas till grafen
     Input('country-dropdown-2', 'value'),
     Input('sport-dropdown', 'value')
 )
@@ -454,8 +467,8 @@ def update_graph(country_selected, sports_selected):
     return fig
 
 
-@callback(
-    Output('figure-medals', 'figure'),
+@app.callback(
+    Output('figure-medals', 'figure'), #Figure är en fastställd syntax och kopplas till grafen
     Input('country-dropdown-2', 'value'),
     Input('sport-dropdown', 'value')
 )
@@ -467,7 +480,7 @@ def update_medals(country_selected, sports_selected):
     fig = px.pie(df_medals, values='Antal medaljer', names='Medal')
     fig.update_layout(title='Antalet medaljer i valda sporterna')
     return fig
-@callback(
+@app.callback(
     Output('figure3', 'figure'),
     Input('country-dropdown-3', 'value'),
     Input('sport-dropdown-3', 'value')
@@ -480,7 +493,7 @@ def update_graph(country_selected, sports_selected):
     fig.update_yaxes(title='Antal deltagare')
     return fig
 
-@callback(
+@app.callback(
     Output('figure-medals-3', 'figure'),
     Input('country-dropdown-3', 'value'),
     Input('sport-dropdown-3', 'value')
@@ -531,7 +544,7 @@ def update_graph(barval):
     fig.update_layout(yaxis_title="Procent")
     return fig
 
-@callback(
+@app.callback(
     Output('langdvikt-graph', 'figure'),
     [Input('langdvikt-radio', 'value')]
 )
@@ -539,7 +552,7 @@ def update_graph(barval):
 def langd_och_vikt_func(gender_choice):
     df_vikt=df_ger[df_ger["Sport"].isin(["Gymnastics", "Handball", "Weightlifting", "Ski Jumping"])]
     df_gender=df_vikt[df_vikt["Sex"]==gender_choice]
-    fig = px.scatter(df_gender, x="Height", range_x=[130,220], y="Weight", range_y=[20,140], color="Sport", opacity=.4)
+    fig = px.scatter(df_gender, x="Weight", range_y=[130,220], y="Height", range_x=[20,140], color="Sport", opacity=.4)
     return fig
 
 @app.callback(
@@ -551,7 +564,7 @@ def coldwar_func(sw_choice):
     df_frg_gdr=df[df["NOC"].isin(["FRG", "GDR"])]
     games_cold_war_s=["1968 Summer", "1972 Summer", "1976 Summer", "1980 Summer", "1984 Summer", "1988 Summer"]
     games_cold_war_w=["1968 Winter", "1972 Winter", "1976 Winter", "1980 Winter", "1984 Winter", "1988 Winter"]
-    df_frg_gdr=df_frg_gdr[df_frg_gdr["Year"].isin([1968, 1972, 1976, 1980, 1984, 1988])]
+    df_frg_gdr=df_frg_gdr[df_frg_gdr["Year"].isin([1968, 1972, 1976, 1980, 1984, 1988])] #FRG är västtyskland och GDR östtyskland
     df_frg_gdr=df_frg_gdr[df_frg_gdr["Medal"].isin(["Gold", "Silver", "Bronze"])]
     df_frg_gdr["Medaltot"]=1
     df_frg_gdr["Winter games"]=None
@@ -574,7 +587,7 @@ def coldwar_func(sw_choice):
 )
 def cross_country_countries(cc_yval):
     cc_delt=[]
-    for j in wo:
+    for j in wo:                                                    
         df_year=df[df["Games"]==j]
         df_year_skidor=df_year[df_year["Sport"]=="Cross Country Skiing"]
         df_year_skidor_medals=df_year_skidor[df_year_skidor["Medal"].isin(["Gold", "Silver", "Bronze"])]
@@ -583,7 +596,6 @@ def cross_country_countries(cc_yval):
         cc_delt.append([j, delt_land, medal_land])
     cross_country_lander=pd.DataFrame(cc_delt, columns=["Games",  "Deltagarländer", "Medaljländer"])
     fig = px.line(cross_country_lander, x="Games", y=cc_yval)
-    fig.update_xaxes(title_font_size=7)
     return fig   
 
 @app.callback(
@@ -600,7 +612,7 @@ def age_histogram(sport_selected):
     Output("age-graph", "figure"),
     [Input("sport-dropdown1", "value")]
 )
-def update_graph(sport):
+def age_line(sport):
     df_sport = df[df["Sport"] == sport]
     df_sport = df_sport.dropna()
     colors = ["#" + ''.join([random.choice('0123456789ABCDEF') for _ in range(6)]) for _ in range(len(df_sport))]
@@ -608,6 +620,7 @@ def update_graph(sport):
     # Skapa ett linjediagram för åldersfördelningen
     fig = px.line(x=age_counts.index, y=age_counts.values, title="Åldersfördelning i " + sport, labels={"x": "Ålder", "y": "Antal deltagare"}, color_discrete_sequence=colors)
     return fig
+
 
 if __name__ == '__main__':
     app.run(debug=True)
