@@ -66,12 +66,12 @@ wo=["1924 Winter", "1928 Winter", "1932 Winter", "1936 Winter",
 
 
 def medalj_individ():
-    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1, width=590, height=650)
+    fig = px.bar(medals, x="Medal", color="Medal", color_discrete_sequence=color1)
     fig.update_layout(title="Tyska Individuella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
     return dcc.Graph(id="medalj_individ", figure=fig)
 
 def medalj_nation():
-    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1, width=590, height=650)
+    fig = px.bar(ny_team_variabel, x="Medal", color="Medal", color_discrete_sequence=color1)
     fig.update_layout(title="Tyska Nationella Medaljer", xaxis_title="Valör", yaxis_title="Antal")
     return dcc.Graph(id="medalj_nation", figure=fig)
 
@@ -115,14 +115,14 @@ app.layout = html.Div([
             dbc.Card(
                 dbc.CardBody([
                     html.H4("Tyska Medaljer", className="card-title"),
-                    dcc.Tabs([
-                        dcc.Tab(label="Individuella medaljer", children=[medalj_individ()], style={'padding': '20px',"color": "black"}),
-                        dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px', "color": "black"})
+                    dcc.Tabs(id="tabbar", children=[
+                        dcc.Tab(label="Individuella medaljer", children=[medalj_individ()], style={'padding': '20px',"color": "black"}, value="tab_ind"),
+                        dcc.Tab(label="Nationella medaljer", children=[medalj_nation()], style={'padding': '20px', "color": "black"}, value="tab_nat")
                     ])
                 ]),
                 className="mb-3", style={"max-width": "100%", "margin": "0 auto"}
             ),
-            width=4  # 4 delar av en 12-kolumn layout för stort card
+            width=4,  # 4 delar av en 12-kolumn layout för stort card
         ),
 
 
@@ -133,11 +133,10 @@ app.layout = html.Div([
                         html.Div(
                             className="d-flex align-items-center",
                             children=[
-                                html.Img(src='/assets/guld.png', style={'width': '15%', 'margin-right': '10px'}),  # Bild till vänster
-                                html.Div([
-                                    html.H4("745", className="card-text"),
-                                    html.P("Guld medaljer", className="card-text")
-                                ])
+                                html.Img(src='/assets/guld.png', style={'width': '21%', 'margin-right': '10px'}),  # Bild till vänster
+                                html.Div(
+                                    html.Div(id="medalj_ind_gold")
+                                )
                             ]
                         ),
                     ]),
@@ -149,11 +148,10 @@ app.layout = html.Div([
                         html.Div(
                             className="d-flex align-items-center",
                             children=[
-                                html.Img(src='/assets/silver.png', style={'width': '15%', 'margin-right': '10px'}),  # Bild till vänster
-                                html.Div([
-                                    html.H4("674", className="card-text"),
-                                    html.P("Silver medaljer", className="card-text")
-                                ])
+                                html.Img(src='/assets/silver.png', style={'width': '21%', 'margin-right': '10px'}),  # Bild till vänster
+                                html.Div(
+                                html.Div(id="medalj_ind_silver")
+                                )
                             ]
                         ),
                     ]),
@@ -165,11 +163,10 @@ app.layout = html.Div([
                         html.Div(
                             className="d-flex align-items-center",
                             children=[
-                                html.Img(src='/assets/bronz.png', style={'width': '18%', 'margin-right': '10px'}),  # Bild till vänster
-                                html.Div([
-                                    html.H4("746", className="card-text"),
-                                    html.P("Brons medaljer", className="card-text")
-                                ])
+                                html.Img(src='/assets/bronz.png', style={'width': '24%', 'margin-right': '10px'}),  # Bild till vänster
+                                html.Div(
+                                    html.Div(id="medalj_ind_bronze")
+                                )
                             ]
                         ),
                     ]),
@@ -224,7 +221,7 @@ app.layout = html.Div([
         dbc.CardBody([
         html.Div([ 
         html.Div([
-            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio', style={"fontSize": "20px"}),
+            dcc.RadioItems(options=["Deltagare", "Medaljer"], value="Deltagare", id='pie-radio', style={"fontSize": "20px", "display": "block", "marginleft": "10px"}),
             dcc.Graph(figure={}, id='pie-graph'),],style={"padding": 10, "flex":1, }),  
         html.Div([
             dcc.RadioItems(options=["Best", "Worst"], value="Best", id='bar-radio', style={"fontSize": "20px"}),
@@ -288,14 +285,14 @@ app.layout = html.Div([
          )
      ], fluid=True),
 
-     dbc.Row([
+    dbc.Row([
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
                      dcc.Graph(figure=fig3)
                  ],style={"padding": 1, "flex":1, })
              )
-         ]),
+         ],width=4),
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
@@ -305,7 +302,7 @@ app.layout = html.Div([
                      dcc.Graph(figure={}, id="langdvikt-graph")
                  ],style={"padding": 1, "flex":1, })
              )
-         ]),
+         ],width=4),
          dbc.Col([
              dbc.Card(
                  dbc.CardBody([
@@ -313,8 +310,8 @@ app.layout = html.Div([
                     dcc.Graph(figure={}, id="coldwar-graph")
                  ],style={"padding": 1, "flex":1, })
              )
-         ])
-     ], className="mb-5"),
+         ],width=4)
+    ], className="mb-4"),
 
      dbc.Row([
          dbc.Col([
@@ -355,6 +352,44 @@ app.layout = html.Div([
         ])
 
 ]) # App.layout stängs här
+@app.callback(
+    Output("medalj_ind_gold", "children"),
+    Input("tabbar", "value")
+)
+def medalj(value):
+    if value == "tab_ind":
+        return [html.H4("745", className="card-text"),
+                html.P("Guld medaljer", className="card-text")]
+    else:
+        return [html.H4("1", className="card-text"),
+                html.P("Guld medaljer", className="card-text")]
+
+
+@app.callback(
+    Output("medalj_ind_silver", "children"),
+    Input("tabbar", "value")
+)
+def medalj(value):
+    if value == "tab_ind":
+        return [html.H4("674", className="card-text"),
+                html.P("Silver medaljer", className="card-text")]
+    else:
+        return [html.H4("2", className="card-text"),
+                html.P("Silver medaljer", className="card-text")]
+    
+
+@app.callback(
+    Output("medalj_ind_bronze", "children"),
+    Input("tabbar", "value")
+)
+def medalj(value):
+    if value == "tab_ind":
+        return [html.H4("746", className="card-text"),
+                html.P("Bronze medaljer", className="card-text")]
+    else:
+        return [html.H4("3", className="card-text"),
+                html.P("Bronze medaljer", className="card-text")]
+
 
 
 @callback(
